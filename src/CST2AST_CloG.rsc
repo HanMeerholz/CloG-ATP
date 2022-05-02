@@ -13,7 +13,7 @@ import List;
 CloGSequent cst2astCloG(start[SCloGSequent] ss){
 	SCloGSequent s = ss.top;
 	
-	return CloGSequent([ cst2astCloG(t) | SCloGTerm t <- s.seq ]);
+	return [ cst2astCloG(t) | SCloGTerm t <- s.seq ];
 }
 
 /* Function for syntax conversion of a CloG term. Conversion called on the proposition and list reduction used to convert label

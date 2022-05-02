@@ -13,8 +13,7 @@ data CloGProof(loc src = |tmp:///|)
 	| CloGUnaryInf(list[CloGTerm] seq, CloGRule rule, CloGProof inf)
 	| CloGBinaryInf(list[CloGTerm] seq, CloGProof infL, CloGProof infR);
 	
-data CloGSequent(loc src = |tmp:///|)
-    = CloGSequent(list[CloGTerm] seq);
+alias CloGSequent = list[CloGTerm];
 
 data CloGTerm(loc src = |tmp:///|)
 	= term(GameLog s, list[CloGName] label);
