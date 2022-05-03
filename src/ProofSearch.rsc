@@ -1,7 +1,7 @@
 module ProofSearch
 
 import List;
-import ATP_Data;
+import ATP_Base;
 import GLASTs;
 import RuleApplications;
 
@@ -45,7 +45,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// andR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeqs = applyAndR(seq, i);
 		if (resSeqs != noSeqs()) {
 			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs);
@@ -57,7 +57,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// orR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyOrR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -68,7 +68,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// choiceR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyChoiceR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -79,7 +79,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// dChoiceR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyDChoiceR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -90,7 +90,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// concatR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyConcatR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -101,7 +101,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// testR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyTestR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -112,7 +112,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// dTestR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyDTestR(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -123,7 +123,7 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// iterR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyIterR(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -134,18 +134,18 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// clo
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyClo(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
 			if (subProof != noProof()) {
-				return proof(CloGUnaryInf(seq, clo(nameS(x, size(cloSeqs)-1)), subProof.p));
+				return proof(CloGUnaryInf(seq, clo(nameS("x", size(cloSeqs)-1)), subProof.p));
 			}
 		}
 	}
 	
 	// dIterR
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyClo(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
@@ -156,18 +156,20 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 	}
 	
 	// exp
-	for (int i <- [1 .. size(seq)]) {
-	    resSeq = applyExp(seq, i);
-		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
-			if (subProof != noProof()) {
-				return proof(CloGUnaryInf(seq, exp(), subProof.p));
+	for (int i <- [0 .. size(seq)]) {
+		for (int j <- [0 .. size(seq[i].label)]) {
+		    resSeq = applyExp(seq, i, j);
+			if (resSeq != noSeq()) {
+				MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+				if (subProof != noProof()) {
+					return proof(CloGUnaryInf(seq, exp(), subProof.p));
+				}
 			}
 		}
 	}
 	
 	// weak
-	for (int i <- [1 .. size(seq)]) {
+	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyWeak(seq, i);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
