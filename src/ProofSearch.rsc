@@ -4,26 +4,37 @@ import List;
 import ATP_Base;
 import GLASTs;
 import RuleApplications;
+import IO;
 
 MaybeProof proofSearch(CloGSequent seq) {
 	return proofSearch(seq, []);
 }
 
 MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
+	//println(seq);
+
 	if (size(seq) == 0) return proof(CloGLeaf());
 	
 	for (CloSeq cs <- cloSeqs) {
 		FpSeq fs = cs.fpSeq;
-	
-		CloGTerm ogFpFormula = seq[fs.fpFormulaIdx];
-		CloGTerm newFpFormula = fs.contextSeq[fs.fpFormulaIdx];
 		
-		if (
-		    ogFpFormula.s == newFpFormula.s
-		 && ogFpFormula.label + cs.name == newFpFormula.label
-		 && delete(seq, fs.fpFormulaIdx) == delete(fs.contextSeq, fs.fpFormulaIdx) 
-		)
-		    return proof(disClo(seq, cs.name));
+		if (size(seq) == size(fs.contextSeq)) {
+			CloGTerm toFind = term(fs.contextSeq[fs.fpFormulaIdx].s,
+			                       fs.contextSeq[fs.fpFormulaIdx].label + cs.name);
+			                       
+			//println("To find = <toFind>");
+			
+			int curIdx = indexOf(seq, toFind);
+			
+			//println("Form<curIdx == -1 ? "not" : ""> found");
+			
+			if (curIdx != -1) {
+				//println(delete(seq, curIdx));
+				//println(delete(fs.contextSeq, fs.fpFormulaIdx));
+				if (delete(seq, curIdx) == delete(fs.contextSeq, fs.fpFormulaIdx))
+					return proof(disClo(seq, cs.name));
+			}
+	    }
 	}
 	
 	// ax1	
@@ -123,15 +134,15 @@ MaybeProof proofSearch(CloGSequent seq, list[CloSeq] cloSeqs) {
 		}
 	}
 	
-	// clo
-	for (int i <- [0 .. size(seq)]) {
-	    resSeq = applyClo(seq, i, cloSeqs);
-		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
-			if (subProof != noProof())
-				return proof(CloGUnaryInf(seq, clo(nameS("x", size(cloSeqs))), subProof.p));
-		}
-	}
+	//// clo
+	//for (int i <- [0 .. size(seq)]) {
+	//    resSeq = applyClo(seq, i, cloSeqs);
+	//	if (resSeq != noSeq()) {
+	//		MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+	//		if (subProof != noProof())
+	//			return proof(CloGUnaryInf(seq, clo(nameS("x", size(cloSeqs))), subProof.p));
+	//	}
+	//}
 	
 	// dIterR
 	for (int i <- [0 .. size(seq)]) {

@@ -6,7 +6,7 @@ module CloGSyntax
  */ 
 
 extend lang::std::Layout;
-extend lang::std::Id;
+//extend lang::std::Id;
 	
 /*
  * A seq file starts with "Seq" and consists of a list of labeled formulae, represented as CloG terms wrapped by [].
@@ -54,3 +54,9 @@ syntax SId
 lexical Int
 	= [1-9][0-9]*
 	| [0];
+	
+// To avoid ambiguity with the underscore, we define an identifier as only consisting
+// of letters (which is already more liberal than the single letter restraint in the
+// literature.
+lexical Id = [a-z A-Z]+
+    ;

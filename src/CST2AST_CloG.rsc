@@ -90,7 +90,7 @@ Game cst2astCloG(SCloGGame g){
 
 // Function for syntax conversion of a Clo rule name
 CloGName id2name(SId n){
-	switch (n){
+	switch (n) {
 		case (SId)`<Id id> _ <Int sub>`:
 			return nameS("<id>",toInt("<sub>"));
 		case (SId)`<Id id>`:

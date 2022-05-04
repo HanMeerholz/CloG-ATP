@@ -4,6 +4,8 @@ import ATP_Base;
 import GLASTs;
 import List;
 
+import IO;
+
 MaybeSequent applyAx1(CloGSequent seq) {
 	if (size(seq) != 2) return noSeq();
 	
@@ -91,9 +93,11 @@ MaybeSequent applyConcatR(CloGSequent seq, int formIdx) {
 
 MaybeSequent applyIterR(CloGSequent seq, int formIdx, list[CloSeq] cloSeqs) {
 	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a) := seq[formIdx]) {
-		for (CloGName x <- a)
+		for (CloGName x <- a) {
+			println(x);
 			if (fpGreaterThan(cloSeqs[x][0].contextSeq[cloSeqs[x][0].fpFormulaIdx].s, \mod(iter(gamma), phi)))
 				return noSeq();
+			}
 		return sequent(seq - seq[formIdx] + term(or(phi, \mod(gamma, \mod(iter(gamma), phi))), a));
 	}
 	
