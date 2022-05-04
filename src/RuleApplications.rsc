@@ -108,7 +108,7 @@ MaybeSequent applyTestR(CloGSequent seq, int formIdx) {
 }
 
 MaybeSequent applyDIterR(CloGSequent seq, int formIdx, list[CloSeq] cloSeqs) {
-	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a) := seq[formIdx]) {
+	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a) := seq[formIdx]) {
 		for (CloGName x <- a)
 			if (fpGreaterThan(cloSeqs[x][0].contextSeq[cloSeqs[x][0].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
 				return noSeq();
@@ -126,7 +126,7 @@ MaybeSequent applyDTestR(CloGSequent seq, int formIdx) {
 }
 
 MaybeSequent applyClo(CloGSequent seq, int formIdx, list[CloSeq] cloSeqs) {
-	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a) := seq[formIdx]) {
+	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a) := seq[formIdx]) {
 		for (CloGName x <- a)
 			if (fpGreaterThan(cloSeqs[x][0].contextSeq[cloSeqs[x][0].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
 				return noSeq();
