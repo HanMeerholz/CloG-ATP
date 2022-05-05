@@ -57,10 +57,10 @@ data MaybeSequents
  * fixpoint formula.
  */
 bool fpGreaterThan(GameLog left, GameLog right) {
-	if (\mod(Game fp0, GameLog _) := left && \mod(Game fp1, GameLog _) := right)
+	if (\mod(Game fp0, _) := left && \mod(Game fp1, _) := right)
 		if (
-	    	(iter(Game _) := fp0 || dIter(Game _) := fp0)
-         && (iter(Game _) := fp1 || dIter(Game _) := fp1)
+	    	(iter(_) := fp0 || dIter(_) := fp0)
+         && (iter(_) := fp1 || dIter(_) := fp1)
 		)
 			return subTerm(fp1, fp0);
 	return false;
@@ -73,9 +73,9 @@ bool fpGreaterThan(GameLog left, GameLog right) {
  * Output: a bool, true if the left Game formula is a subterm of the right, and
  * false otherwise.
  *
- * One Game formula is a subterm of the other, if it appears in the other
- * formula, which is the same as saying the one Game formula is a descendant of
- * the other.
+ * One Game formula is a subterm of the other, if the one formula appears in the
+ * other formula, which is the same as saying the one Game formula is a descendant
+ * of the other.
  */
 bool subTerm(Game g, Game h) {
 	if (/g := h)
