@@ -1,9 +1,10 @@
 module ATP_Base
 
 import GLASTs;
+import Map;
 
 alias FpSeq = tuple[CloGSequent contextSeq, int fpFormulaIdx];
-alias CloSeq = tuple[CloGName name, FpSeq fpSeq];
+alias CloSeqs = map[CloGName name, FpSeq fpSeq];
 
 /*
  * Define MaybeProof as either a proof, or null, if no proof could be found.
