@@ -12,9 +12,6 @@ import List;
 void LaTeXOutput(CloGProof p, loc out){
 	writeFile(out, LaTeXOutput(p));
 }
-void LaTeXOutput(GProof p, loc out){
-	writeFile(out, LaTeXOutput(p));
-}
 
 // Functions define the preamle and proof tree wrapper for LaTeX output
 str LaTeXOutput(CloGProof p) = 
@@ -26,18 +23,6 @@ str LaTeXOutput(CloGProof p) =
 	'
 	'\\begin{prooftree}
 	'<LaTeXCloGTree(p)>
-	'\\end{prooftree}
-	'
-	'\\end{document}";
-str LaTeXOutput(GProof p) = 
-	"\\documentclass{article}
-	'\\usepackage[utf8]{inputenc}
-	'\\usepackage{prooftrees}
-	'
-	'\\begin{document}
-	'
-	'\\begin{prooftree}
-	'<LaTeXGTree(p)>
 	'\\end{prooftree}
 	'
 	'\\end{document}";
@@ -82,36 +67,6 @@ str LaTeXCloGTree(clo(CloGName n)) =  "clo$_{<LaTeXCloGTree(n)>}$";
 // Function to output a CloG name which can have a subscript
 str LaTeXCloGTree(name(str n)) = "<n>";
 str LaTeXCloGTree(nameS(str n, int sub)) = "<n>_{<sub>}";
-
-// Function to output the LaTeX proof tree part for each G sequent and assocated rule label
-str LaTeXGTree(GLeaf()) 
-	= "\\AxiomC{}";
-str LaTeXGTree(GUnaryInf(list[GameLog] seq, GRule rule, GProof inf)) =
-	"<LaTeXGTree(inf)>
-	'\\RightLabel{<LaTeXGTree(rule)>}
-	'\\UnaryInfC{$<(LaTeXGameLog(head(seq)) | it + ", " + LaTeXGameLog(g) | GameLog g <- tail(seq))>$}";
-str LaTeXGTree(GBinaryInf(list[GameLog] seq, GProof infL, GProof infR)) =
-	"<LaTeXGTree(infL)>
-	'<LaTeXGTree(infR)>
-	'\\RightLabel{$\\wedge$}
-	'\\BinaryInfC{$<(LaTeXGameLog(head(seq)) | it + ", " + LaTeXGameLog(g) | GameLog g <- tail(seq))>$}";
-
-// Function to output the G rule labels
-str LaTeXGTree(ax()) = "Ax";
-str LaTeXGTree(Gmodm()) = "mod$_{m}$";
-str LaTeXGTree(Gand()) = "$\\wedge$"; 
-str LaTeXGTree(Gor()) =  "$\\vee$";
-str LaTeXGTree(Gchoice()) =  "$\\sqcup$";
-str LaTeXGTree(GdChoice()) =  "$\\sqcap$";
-str LaTeXGTree(Gweak()) =  "weak";
-str LaTeXGTree(concatd()) =  "$;_d$";
-str LaTeXGTree(Giter()) =  "$*$";
-str LaTeXGTree(Gtest()) =  "$?$";
-str LaTeXGTree(GdIter()) =  "$\\times$";
-str LaTeXGTree(GdTest()) =  "$!$";
-str LaTeXGTree(mongd()) =  "mon$^g_d$";
-str LaTeXGTree(monfd()) =  "mon$^f_d$";
-str LaTeXGTree(inds()) =  "ind$_s$";
 
 // Function to output the game logic formulae in LaTeX maths mode
 str LaTeXGameLog(top()) = "(p\\vee\\neg p)";
