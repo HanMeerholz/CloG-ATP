@@ -16,7 +16,21 @@ import IO;
  * Initially, the map keeping track of names and fixpoint formulae is empty.
  */
 MaybeProof proofSearch(CloGSequent seq) {
-	return proofSearch(seq, ());
+	return proofSearch(seq, (), -1);
+}
+
+/*
+ * Initially, the map keeping track of names and fixpoint formulae is empty.
+ */
+MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
+	return proofSearch(seq, cloSeqs, -1);
+}
+
+/*
+ * Initially, the map keeping track of names and fixpoint formulae is empty.
+ */
+MaybeProof proofSearch(CloGSequent seq, int maxRecursionDepth) {
+	return proofSearch(seq, (), maxRecursionDepth);
 }
 
 /*
@@ -55,9 +69,11 @@ MaybeProof proofSearch(CloGSequent seq) {
  * similarly, since they can remove a name from a sequent, which means the associated entry in
  * the closure sequents map can be removed.
  */
-MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
+MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	//println("seq=<seq>");
 	//println("cloSeqs=<cloSeqs>");
+	
+	if (depth == 0) return noProof();
 
 	if (size(seq) == 0) return proof(CloGLeaf());
 	
@@ -77,10 +93,33 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	    }
 	}
 	
+	CloSeqs newCloSeqs;
+	MaybeSequent resSeq;
+	
+	// weak
+	for (int i <- [0 .. size(seq)]) {
+	    <resSeq, newCloSeqs> = applyWeak(seq, i, cloSeqs);
+		if (resSeq != noSeq()) {
+			MaybeProof subProof = proofSearch(resSeq.seq, newCloSeqs, depth - 1);
+			if (subProof != noProof())
+				return proof(CloGUnaryInf(seq, weak(), subProof.p));
+		}
+	}
+	
+	// exp
+	for (int i <- [0 .. size(seq)])
+		for (int j <- [0 .. size(seq[i].label)])
+		    <resSeq, newCloSeqs> = applyExp(seq, i, j, cloSeqs);
+			if (resSeq != noSeq()) {
+				MaybeProof subProof = proofSearch(resSeq.seq, newCloSeqs, depth - 1);
+				if (subProof != noProof())
+					return proof(CloGUnaryInf(seq, exp(), subProof.p));
+			}
+	
 	// ax1	
 	resSeq = applyAx1(seq);
 	if (resSeq != noSeq()) {
-		MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+		MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 		if (subProof != noProof())
 			return proof(CloGUnaryInf(seq, ax1(), subProof.p));
 	}
@@ -88,27 +127,16 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	// modm	
 	resSeq = applyModm(seq);
 	if (resSeq != noSeq()) {
-		MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+		MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 		if (subProof != noProof())
 			return proof(CloGUnaryInf(seq, modm(), subProof.p));
-	}
-	
-	// andR
-	for (int i <- [0 .. size(seq)]) {
-	    resSeqs = applyAndR(seq, i);
-		if (resSeqs != noSeqs()) {
-			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs);
-			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs);
-			if (subProofL != noProof() && subProofR != noProof())
-				return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
-		}
 	}
 	
 	// orR
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyOrR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, orR(), subProof.p));
 		}
@@ -118,7 +146,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyChoiceR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, choiceR(), subProof.p));
 		}
@@ -128,7 +156,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyDChoiceR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, dChoiceR(), subProof.p));
 		}
@@ -138,7 +166,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyConcatR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, concatR(), subProof.p));
 		}
@@ -148,7 +176,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyTestR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, testR(), subProof.p));
 		}
@@ -158,7 +186,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyDTestR(seq, i);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, dTestR(), subProof.p));
 		}
@@ -168,7 +196,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyIterR(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, iterR(), subProof.p));
 		}
@@ -176,11 +204,11 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	
 	// clo
 	for (int i <- [0 .. size(seq)]) {
-	    <resSeq, cloSeqs> = applyClo(seq, i, cloSeqs);
+	    <resSeq, newCloSeqs> = applyClo(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, newCloSeqs, depth - 1);
 			if (subProof != noProof())
-				return proof(CloGUnaryInf(seq, clo(nameS("x", size(cloSeqs))), subProof.p));
+				return proof(CloGUnaryInf(seq, clo(nameS("x", size(newCloSeqs))), subProof.p));
 		}
 	}
 	
@@ -188,29 +216,20 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs) {
 	for (int i <- [0 .. size(seq)]) {
 	    resSeq = applyDIterR(seq, i, cloSeqs);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, depth - 1);
 			if (subProof != noProof())
 				return proof(CloGUnaryInf(seq, dIterR(), subProof.p));
 		}
 	}
 	
-	// exp
-	for (int i <- [0 .. size(seq)])
-		for (int j <- [0 .. size(seq[i].label)])
-		    <resSeq, cloSeqs> = applyExp(seq, i, j, cloSeqs);
-			if (resSeq != noSeq()) {
-				MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
-				if (subProof != noProof())
-					return proof(CloGUnaryInf(seq, exp(), subProof.p));
-			}
-	
-	// weak
+	// andR
 	for (int i <- [0 .. size(seq)]) {
-	    <resSeq, cloSeqs> = applyWeak(seq, i, cloSeqs);
-		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs);
-			if (subProof != noProof())
-				return proof(CloGUnaryInf(seq, weak(), subProof.p));
+	    resSeqs = applyAndR(seq, i);
+		if (resSeqs != noSeqs()) {
+			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs, depth - 1);
+			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs, depth - 1);
+			if (subProofL != noProof() && subProofR != noProof())
+				return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
 		}
 	}
 	

@@ -313,9 +313,10 @@ MaybeSequent applyConcatR(CloGSequent seq, int termIdx) {
 MaybeSequent applyIterR(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 		for (CloGName x <- a) {
-			if (fpGreaterThan(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
+			if (fpGreaterThan(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi))) {
 				return noSeq();
 			}
+		}
 		println("applied iter");
 		return sequent(seq - seq[termIdx] + term(or(phi, \mod(gamma, \mod(iter(gamma), phi))), a));
 	}

@@ -6,6 +6,7 @@ module ATP_Base
 
 import GLASTs;
 import Map;
+import IO;
 
 /* 
  * A FpSeq, or fixpoint sequent is a tuple containing a sequent that contains
@@ -53,7 +54,7 @@ data MaybeSequents
  *         GameLog formula according to the fixpoint ordering, and false otherwise.
  *
  * One fixpoint formula is considered greater than another fixpoint formula, if
- * the game in the other fixpoint formula is a subterm of the game in the one
+ * the game in the other fixpoint formula is not a subterm of the game in the one
  * fixpoint formula.
  */
 bool fpGreaterThan(GameLog left, GameLog right) {
@@ -62,7 +63,7 @@ bool fpGreaterThan(GameLog left, GameLog right) {
 	    	(iter(_) := fp0 || dIter(_) := fp0)
          && (iter(_) := fp1 || dIter(_) := fp1)
 		)
-			return subTerm(fp1, fp0);
+			return !subTerm(fp1, fp0);
 	return false;
 }
 
