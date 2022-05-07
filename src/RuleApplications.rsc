@@ -96,7 +96,7 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /*
- * A function applying the andR rule to a sequent.
+ * A function applying the and rule to a sequent.
  *
  * Input:  the sequent to which the rule is applied, and an integer indicating
  *         which term in the sequent to apply the rule to
@@ -110,7 +110,7 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * specified term is replaced by "phi^a", and for the other, it is replaced by
  * "psi^a", is returned. Otherwise, noSeqs() is returned.
  */
-MaybeProof tryApplyAndR(CloGSequent seq, CloSeqs cloSeqs, int depth) {	
+MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, int depth) {	
 	for (int termIdx <- [0 .. size(seq)]) {
 	    if (term(and(GameLog phi, GameLog psi), list[CloGName] a) := seq[termIdx]) {
 			println("applied and");
@@ -130,7 +130,7 @@ MaybeProof tryApplyAndR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 
 
 /*
- * A function applying the orR rule to a sequent and calling the main
+ * A function applying the or rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -141,7 +141,7 @@ MaybeProof tryApplyAndR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * "phi^a", and "psi^a". If a subproof is found, A CloGUnaryInf with the resulting
  * subproof, and the applied orR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyOrR(CloGSequent seq, CloSeqs cloSeqs, int depth) {	
+MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, int depth) {	
 	for (int termIdx <- [0 .. size(seq)]) {
 	    if (term(or(GameLog phi, GameLog psi), list[CloGName] a) := seq[termIdx]) {
 			println("applied or");
@@ -156,7 +156,7 @@ MaybeProof tryApplyOrR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the choiceR rule to a sequent and calling the main
+ * A function applying the choice rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -168,7 +168,7 @@ MaybeProof tryApplyOrR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * the resulting subproof, and the applied choiceR() rule is returned. Otherwise,
  * noProof() is returned.
  */
-MaybeProof tryApplyChoiceR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		    if (term(\mod(choice(Game gamma, Game delta), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 				println("applied choice");
@@ -183,7 +183,7 @@ MaybeProof tryApplyChoiceR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the dChoiceR rule to a sequent and calling the main
+ * A function applying the dChoice rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -195,7 +195,7 @@ MaybeProof tryApplyChoiceR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * the resulting subproof, and the applied dChoiceR() rule is returned. Otherwise,
  * noProof() is returned.
  */
-MaybeProof tryApplyDChoiceR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		    if (term(\mod(dChoice(Game gamma, Game delta), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 				println("applied dChoice");
@@ -307,7 +307,7 @@ MaybeProof tryApplyExp(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the concatR rule to a sequent and calling the main
+ * A function applying the concat rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -319,7 +319,7 @@ MaybeProof tryApplyExp(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * resulting subproof, and the applied concatR() rule is returned. Otherwise,
  * noProof() is returned.
  */
-MaybeProof tryApplyConcatR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		    if (term(\mod(concat(Game gamma, Game delta), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 				println("applied concat");
@@ -334,7 +334,7 @@ MaybeProof tryApplyConcatR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the iterR rule to a sequent and calling the main
+ * A function applying the iter rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -349,7 +349,7 @@ MaybeProof tryApplyConcatR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * the resulting subproof, and the applied iterR() rule is returned. Otherwise,
  * noProof() is returned.
  */
-MaybeProof tryApplyIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a) := seq[termIdx]) {	
 			
@@ -374,7 +374,7 @@ MaybeProof tryApplyIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the testR rule to a sequent and calling the main
+ * A function applying the test rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -386,7 +386,7 @@ MaybeProof tryApplyIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * subproof, and the applied testR() rule is returned. Otherwise, noProof()
  * is returned.
  */
-MaybeProof tryApplyTestR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		    if (term(\mod(\test(GameLog psi), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 				println("applied test");
@@ -401,7 +401,7 @@ MaybeProof tryApplyTestR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 }
 
 /* 
- * A function applying the dIterR rule to a sequent and calling the main
+ * A function applying the dIter rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -416,7 +416,7 @@ MaybeProof tryApplyTestR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * the resulting subproof, and the applied dIterR() rule is returned. Otherwise,
  * noProof() is returned.
  */
-MaybeProof tryApplyDIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a) := seq[termIdx]) {	
 			bool nextTerm = false;
@@ -440,7 +440,7 @@ MaybeProof tryApplyDIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 
 
 /* 
- * A function applying the testR rule to a sequent and calling the main
+ * A function applying the test rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
  * For the rule to be applied, the term at the specified index must be of
@@ -452,7 +452,7 @@ MaybeProof tryApplyDIterR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
  * subproof, and the applied dTestR() rule is returned. Otherwise, noProof()
  * is returned.
  */
-MaybeProof tryApplyDTestR(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		    if (term(\mod(dTest(GameLog psi), GameLog phi), list[CloGName] a) := seq[termIdx]) {
 				println("applied dTest");

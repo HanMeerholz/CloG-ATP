@@ -82,40 +82,40 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	resProof = tryApplyModm(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyWeak(seq, cloSeqs, depth);
+	resProof = tryApplyAnd(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyExp(seq, cloSeqs, depth);
+	resProof = tryApplyOr(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyOrR(seq, cloSeqs, depth);
+	resProof = tryApplyChoice(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyChoiceR(seq, cloSeqs, depth);
+	resProof = tryApplyDChoice(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyDChoiceR(seq, cloSeqs, depth);
+	resProof = tryApplyConcat(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyConcatR(seq, cloSeqs, depth);
+	resProof = tryApplyTest(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyTestR(seq, cloSeqs, depth);
-	if (resProof != noProof()) return resProof;
-	
-	resProof = tryApplyDTestR(seq, cloSeqs, depth);
-	if (resProof != noProof()) return resProof;
-	
-	resProof = tryApplyIterR(seq, cloSeqs, depth);
+	resProof = tryApplyDTest(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
 	resProof = tryApplyClo(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyDIterR(seq, cloSeqs, depth);
+	resProof = tryApplyIter(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyAndR(seq, cloSeqs, depth);
+	resProof = tryApplyDIter(seq, cloSeqs, depth);
+	if (resProof != noProof()) return resProof;
+	
+	resProof = tryApplyWeak(seq, cloSeqs, depth);
+	if (resProof != noProof()) return resProof;
+	
+	resProof = tryApplyExp(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
 	return noProof();
