@@ -46,24 +46,25 @@ data MaybeSequents
     | noSeqs();
     
 /*
- * An algorithm returning whether one fixpoint formula is bigger than the other,
- * according to the fixpoint ordering defined in the literature.
+ * An algorithm returning whether one fixpoint formula is less than or equal to
+ * the other, according to the fixpoint ordering defined in the literature.
  *
  * Input:  two GameLog formulae
- * Output: a bool, true if the left GameLog formula is greater than the right
- *         GameLog formula according to the fixpoint ordering, and false otherwise.
+ * Output: a bool, true if the left GameLog formula is less than or equal to the
+ *         right GameLog formula according to the fixpoint ordering, and false
+ *         otherwise.
  *
- * One fixpoint formula is considered greater than another fixpoint formula, if
- * the game in the other fixpoint formula is not a subterm of the game in the one
- * fixpoint formula.
+ * One fixpoint formula is considered less than or equal to another fixpoint
+ * formula, if the game in the other fixpoint formula is a subterm of the game
+ * in the one fixpoint formula.
  */
-bool fpGreaterThan(GameLog left, GameLog right) {
+bool fpLessThanOrEqualTo(GameLog left, GameLog right) {
 	if (\mod(Game fp0, _) := left && \mod(Game fp1, _) := right)
 		if (
 	    	(iter(_) := fp0 || dIter(_) := fp0)
          && (iter(_) := fp1 || dIter(_) := fp1)
 		)
-			return !subTerm(fp1, fp0);
+			return subTerm(fp1, fp0);
 	return false;
 }
 
@@ -72,7 +73,7 @@ bool fpGreaterThan(GameLog left, GameLog right) {
  *
  * Input:  two Game formulae
  * Output: a bool, true if the left Game formula is a subterm of the right, and
- * false otherwise.
+ *         false otherwise.
  *
  * One Game formula is a subterm of the other, if the one formula appears in the
  * other formula, which is the same as saying the one Game formula is a descendant
