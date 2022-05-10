@@ -5,8 +5,6 @@ module ATP_Base
  */
 
 import GLASTs;
-import Map;
-import IO;
 
 /* 
  * A FpSeq, or fixpoint sequent is a tuple containing a sequent that contains
