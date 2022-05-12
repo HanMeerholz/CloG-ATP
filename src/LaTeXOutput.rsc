@@ -43,10 +43,10 @@ str LaTeXCloGTree(CloGBinaryInf(list[CloGTerm] seq, CloGProof infL, CloGProof in
 	'\\BinaryInfC{$<(LaTeXCloGTree(head(seq)) | it + ", " + LaTeXCloGTree(t) | CloGTerm t <- tail(seq))>$}";
 	
 // Function to output the superscript label attached to each logic formula
-str LaTeXCloGTree(term(GameLog s, [])) 
-	= "(<LaTeXGameLog(s)>)^{\\varepsilon}";
-str LaTeXCloGTree(term(GameLog s, list[CloGName] label)) 
-	= "(<LaTeXGameLog(s)>)^{<(LaTeXCloGTree(head(label)) | it + ", " + LaTeXCloGTree(n) | CloGName n <- tail(label))>}";
+str LaTeXCloGTree(term(GameLog s, [], bool active)) 
+	= "<active ? "\\textcolor{red}{" : "">(<LaTeXGameLog(s)>)^{\\varepsilon}<active ? "}" : "">";
+str LaTeXCloGTree(term(GameLog s, list[CloGName] label, bool active)) 
+	= "<active ? "\\textcolor{red}{" : "">(<LaTeXGameLog(s)>)^{<(LaTeXCloGTree(head(label)) | it + ", " + LaTeXCloGTree(n) | CloGName n <- tail(label))>} <active ? "}" : "">";
 
 // Function to output the CloG rule labels
 str LaTeXCloGTree(ax1()) = "Ax1";

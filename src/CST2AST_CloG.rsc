@@ -22,7 +22,7 @@ CloGSequent cst2astCloG(start[SCloGSequent] ss){
  * Output: CloG term algebraic type
  */
 CloGTerm cst2astCloG(SCloGTerm t){
-	return term(cst2astCloG(t.ex), [id2name(n) | SId n <- t.label]);
+	return term(cst2astCloG(t.ex), [id2name(n) | SId n <- t.label], false);
 }
 
 /* Function for syntax conversion of a normal form game logic propositional formula. Switch statement used to identify which

@@ -16,7 +16,7 @@ data CloGProof(loc src = |tmp:///|)
 alias CloGSequent = list[CloGTerm];
 
 data CloGTerm(loc src = |tmp:///|)
-	= term(GameLog s, list[CloGName] label);
+	= term(GameLog s, list[CloGName] label, bool active);
 
 data CloGRule(loc src = |tmp:///|)
 	= ax1()

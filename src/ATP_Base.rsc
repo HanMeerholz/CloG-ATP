@@ -5,6 +5,7 @@ module ATP_Base
  */
 
 import GLASTs;
+import Exception;
 
 /* 
  * A FpSeq, or fixpoint sequent is a tuple containing a sequent that contains
@@ -63,11 +64,12 @@ bool fpLessThanOrEqualTo(GameLog left, GameLog right) {
          && (iter(_) := fp1 || dIter(_) := fp1)
 		)
 			return subTerm(fp1, fp0);
-	return false;
+	throw IllegalArgument("Error: cannot apply fixpoint ordering on non-fixpoint formulae!");
 }
 
 /*
- * An algorithm returning whether one game formula is a subterm of the other.
+ * An algorithm returning whether one game formula is a subterm of the other (or
+ * if they are equal).
  *
  * Input:  two Game formulae
  * Output: a bool, true if the left Game formula is a subterm of the right, and
