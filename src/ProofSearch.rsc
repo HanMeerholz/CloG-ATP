@@ -74,6 +74,8 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	//println("seq    = <seq>");
 	//println("fpSeqs = <fpSeqs>");
 	
+	
+	
 	if (depth == 0) return proof(CloGLeaf());
 	
 	//if (isEmpty(seq)) return proof(CloGLeaf());
@@ -82,6 +84,8 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	if (resProof != noProof()) return resProof;
 	
 	if (detectCycles(seq, fpSeqs)) return noProof();	
+	
+	//fpSeqs += [seq];
 	
 	resProof = tryApplyAx1(seq);
 	if (resProof != noProof()) return resProof;
@@ -101,23 +105,25 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	resProof = tryApplyDTest(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyClo(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != noProof()) return resProof;
-	
 	resProof = tryApplyOr(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
 	resProof = tryApplyAnd(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
+	resProof = tryApplyConcat(seq, cloSeqs, fpSeqs, depth);
+	if (resProof != noProof()) return resProof;
+	
+	resProof = tryApplyClo(seq, cloSeqs, fpSeqs, depth);
+	if (resProof != noProof()) return resProof;	
+		
 	resProof = tryApplyIter(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) return resProof;
 		
 	resProof = tryApplyDIter(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != noProof()) return resProof;
+	if (resProof != noProof()) return resProof;	
 	
-	resProof = tryApplyConcat(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != noProof()) return resProof;
+	
 		
 	return noProof();
 }

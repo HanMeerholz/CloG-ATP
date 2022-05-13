@@ -55,8 +55,8 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
 }
 
 /*
- * All of the remaining functions defined in here have the following inputs'
- * and outputs: 
+ * All of the remaining tryApply<rulename> functions defined in here have the
+ * following inputs' and outputs: 
  *
  * Input:  the sequent to which the rule is applied, the map of closure
  *         sequents, the list of fixpoint sequents, and the current depth
@@ -96,25 +96,46 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 	return noProof();
 }
 
-/*
- * A function applying the and rule to a sequent.
+/* A function applying the and rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the and rule to
+ * Output: the sequent resulting from applying the and rule
  *
  * For the rule to be applied, the term at the specified index must be of
  * the form "(phi & psi)^a".
  * 
- * If this condition is met, a pair of sequents, such that for one of them, the
- * specified term is replaced by "phi^a", and for the other, it is replaced by
- * "psi^a", is returned. Otherwise, noSeqs() is returned.
+ * If this condition is met, a pair of sequents is returned, such that for one of
+ * them, the specified term is replaced by "phi^a", and for the other, it is
+ * replaced by "psi^a". Otherwise, noSeqs() is returned.
  */
-MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {	
+MaybeSequents applyAnd(CloGSequent seq, int termIdx) {
+	if (term(and(GameLog phi, GameLog psi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied and");
+		
+		copySeq = seq;
+		seq[termIdx] = term(phi, a, false);
+		copySeq[termIdx] = term(psi, a, false);
+		
+		return sequents(seq, copySeq);
+	}
+	return noSeqs();
+}
+
+/*
+ * A function applying the "and" rule to a sequent and calling the main
+ * proof search algorithm on the resulting sequents.
+ *
+ * For any of the terms in the sequent, the algorithm checks tries to apply the and
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGBinaryInf with the resulting subproofs, is returned.
+ * Otherwise, noProof() is returned.
+ */
+MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {		
 	for (int termIdx <- [0 .. size(seq)]) {
-	    if (term(and(GameLog phi, GameLog psi), list[CloGName] a, _) := seq[termIdx]) {
-			println("applied and");
-			CloGSequent resSeqL = seq - seq[termIdx] + term(phi, a, false); 
-			CloGSequent resSeqR = seq - seq[termIdx] + term(psi, a, false); 
-			
-			MaybeProof subProofL = proofSearch(resSeqL, cloSeqs, fpSeqs, depth - 1);
-			MaybeProof subProofR = proofSearch(resSeqR, cloSeqs, fpSeqs, depth - 1);
+		MaybeSequents resSeqs = applyAnd(seq, termIdx);
+		if (resSeqs != noSeqs()) {
+			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs, fpSeqs, depth - 1);
+			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs, fpSeqs, depth - 1);
 			if (subProofL != noProof() && subProofR != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
@@ -129,26 +150,29 @@ MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
  * 
  * Input:  the sequent and the index of the term therein to apply the or rule to
  * Output: the sequent resulting from applying the or rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(phi | psi)^a".
+ * 
+ * If this condition is met, the specified term in the given sequent is replaced by two
+ * terms "phi^a", and "psi^a" and the sequent is returned. Otherwise, noSeq() is returned.
  */
 MaybeSequent applyOr(CloGSequent seq, int termIdx) {
 	if (term(or(GameLog phi, GameLog psi), list[CloGName] a, _) := seq[termIdx]) {
 		println("applied or");
-		return sequent(seq - seq[termIdx] + term(phi, a, false) + term(psi, a, false));
+		return sequent(seq[0 .. termIdx] +term(phi, a, false) + term(psi, a, false) + seq[termIdx+1 .. size(seq)]);
 	}
 	return noSeq();
 }
 
 /*
- * A function applying the or rule to a sequent and calling the main
+ * A function applying the "or" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
- *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(phi | psi)^a".
  * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by two terms
- * "phi^a", and "psi^a". If a subproof is found, A CloGUnaryInf with the resulting
- * subproof, and the applied orR() rule is returned. Otherwise, noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the or
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied orR()
+ * rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {	
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -165,98 +189,146 @@ MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs
 	return noProof();
 }
 
-
+/* A function applying the or rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the choice rule to
+ * Output: the sequent resulting from applying the choice rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<gamma || delta>phi)^a".
+ * 
+ * If this condition is met, the specified term in the given sequent is replaced by
+ * two term "(<gamma>phi | <delta> phi)^a" and the sequent is returned. Otherwise,
+ * noSeq() is returned.
+ */
+MaybeSequent applyChoice(CloGSequent seq, int termIdx) {
+	if (term(\mod(choice(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied choice");
+		seq[termIdx] = term(or(\mod(gamma, phi), \mod(delta, phi)), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
+}
 
 /* 
  * A function applying the choice rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<gamma || delta>phi)^a".
- * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(<gamma>phi | <delta> phi)^a". If a subproof is found, A CloGUnaryInf with
- * the resulting subproof, and the applied choiceR() rule is returned. Otherwise,
- * noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the choice
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
+ * choiceR() rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		    if (term(\mod(choice(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-				println("applied choice");
-				CloGSequent resSeq = seq - seq[termIdx] + term(or(\mod(gamma, phi), \mod(delta, phi)), a, false);
-				MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
-				if (subProof != noProof()) {
-					seq[termIdx].active = true;
-					return proof(CloGUnaryInf(seq, choiceR(), subProof.p));
-				}
+		MaybeSequent resSeq = applyChoice(seq, termIdx);
+		if (resSeq != noSeq()) {
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, choiceR(), subProof.p));
 			}
 		}
-		
+	}
+
 	return noProof();
+}
+
+/* A function applying the dChoice rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the dChoice rule to
+ * Output: the sequent resulting from applying the dChoice rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<gamma && delta>phi)^a".
+ * 
+ * If this condition is met, the specified term in the given sequent is replaced by
+ * two term "(<gamma>phi & <delta> phi)^a" and the sequent is returned. Otherwise,
+ * noSeq() is returned.
+ */
+MaybeSequent applyDChoice(CloGSequent seq, int termIdx) {
+	if (term(\mod(dChoice(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied dChoice");
+		seq[termIdx] = term(and(\mod(gamma, phi), \mod(delta, phi)), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
 }
 
 /* 
  * A function applying the dChoice rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<gamma && delta>phi)^a".
- * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(<gamma>phi & <delta> phi)^a". If a subproof is found, A CloGUnaryInf with
- * the resulting subproof, and the applied dChoiceR() rule is returned. Otherwise,
- * noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the dChoice
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
+ * dChoiceR() rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		    if (term(\mod(dChoice(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-				println("applied dChoice");
-				CloGSequent resSeq = seq - seq[termIdx] + term(and(\mod(gamma, phi), \mod(delta, phi)), a, false);
-				MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
-				if (subProof != noProof()) {
-					seq[termIdx].active = true;
-					return proof(CloGUnaryInf(seq, dChoiceR(), subProof.p));
-				}
+		MaybeSequent resSeq = applyDChoice(seq, termIdx);
+		if (resSeq != noSeq()) {
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, dChoiceR(), subProof.p));
 			}
 		}
+	}
 		
 	return noProof();
+}
+
+/* A function applying the concat rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the concat rule to
+ * Output: the sequent resulting from applying the concat rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<gamma; delta>phi)^a".
+ * 
+ * If this condition is met, the specified term in the given sequent is replaced by
+ * the term "(<gamma><delta>phi)^a" and the sequent is returned. Otherwise, noSeq()
+ * is returned.
+ */
+MaybeSequent applyConcat(CloGSequent seq, int termIdx) {
+	if (term(\mod(concat(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied concat");
+		seq[termIdx] = term(\mod(gamma, \mod(delta, phi)), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
 }
 
 /* 
  * A function applying the concat rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
- *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<gamma; delta>phi)^a".
  * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(<gamma><delta>phi)^a". If a subproof is found, A CloGUnaryInf with the
- * resulting subproof, and the applied concatR() rule is returned. Otherwise,
- * noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the concat
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
+ * concatR() rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		    if (term(\mod(concat(Game gamma, Game delta), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-				println("applied concat");
-				CloGSequent resSeq = seq - seq[termIdx] + term(\mod(gamma, \mod(delta, phi)), a, false);
-				MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
-				if (subProof != noProof()) {
-					seq[termIdx].active = true;
-					return proof(CloGUnaryInf(seq, concatR(), subProof.p));
-				}
+		MaybeSequent resSeq = applyConcat(seq, termIdx);
+		if (resSeq != noSeq()) {
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, concatR(), subProof.p));
 			}
 		}
+	}
 		
 	return noProof();
 }
 
-/* 
- * A function applying the iter rule to a sequent and calling the main
- * proof search algorithm on the resulting sequent.
+/* A function applying the iter rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the iter rule to,
+ *         and the list of closure sequents
+ * Output: the sequent resulting from applying the iter rule
  *
  * For the rule to be applied, the term at the specified index must be of
  * the form "(<gamma*>phi)^a".
@@ -264,31 +336,41 @@ MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fp
  * "<gamma*>phi" fixpoint formula, according to the order on fixpoint formulae
  * defined in the literature.
  * 
- * If these conditions are met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(phi | <gamma><gamma*>phi)^a". If a subproof is found, A CloGUnaryInf with
- * the resulting subproof, and the applied iterR() rule is returned. Otherwise,
- * noProof() is returned.
+ * If these conditions is met, the specified term in the given sequent is replaced by
+ * the term "(phi | <gamma><gamma*>phi)^a" and the sequent is returned. Otherwise,
+ * noSeq() is returned.
+ */
+MaybeSequent applyIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
+	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+	
+		for (CloGName x <- a)
+			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
+				return noSeq();
+	
+		println("applied iter");
+		seq[termIdx] = term(or(phi, \mod(gamma, \mod(iter(gamma), phi))), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
+}
+
+/* 
+ * A function applying the iter rule to a sequent and calling the main
+ * proof search algorithm on the resulting sequent.
+ *
+ * For any of the terms in the sequent, the algorithm checks tries to apply the iter
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
+ * and a CloGUnaryInf with the resulting subproof, and the applied iterR() rule is returned.
+ * Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {	
-			
-		
-			bool nextTerm = false;
-				
-			for (CloGName x <- a)
-				if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
-					nextTerm = true;
-			
-			if (nextTerm) continue;
-			
+	
+		MaybeSequent resSeq = applyIter(seq, termIdx, cloSeqs);
+		if (resSeq != noSeq()) {
 			fpSeqs += [seq];
-			
-			println("applied iter");
-			CloGSequent resSeq =  seq - seq[termIdx] + term(or(phi, \mod(gamma, \mod(iter(gamma), phi))), a, false);
-			
-			MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, iterR(), subProof.p));
@@ -298,153 +380,222 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 	return noProof();	
 }
 
-/* 
- * A function applying the test rule to a sequent and calling the main
- * proof search algorithm on the resulting sequent.
+/* A function applying the test rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the test rule to
+ * Output: the sequent resulting from applying the test rule
  *
  * For the rule to be applied, the term at the specified index must be of
  * the form "(<psi?>phi)^a".
  * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(phi & psi)^a". If a subproof is found, A CloGUnaryInf with the resulting
- * subproof, and the applied testR() rule is returned. Otherwise, noProof()
- * is returned.
+ * If this condition is met, the specified term in the given sequent is replaced by
+ * the term "(phi & psi)^a" and the sequent is returned. Otherwise, noSeq() is returned.
+ */
+MaybeSequent applyTest(CloGSequent seq, int termIdx) {
+	if (term(\mod(\test(GameLog psi), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied test");
+		seq[termIdx] = term(and(psi, phi), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
+}
+
+/* 
+ * A function applying the test rule to a sequent and calling the main
+ * proof search algorithm on the resulting sequent.
+ *
+ * For any of the terms in the sequent, the algorithm checks tries to apply the test
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
+ * testR() rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		    if (term(\mod(\test(GameLog psi), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-				println("applied test");
-				CloGSequent resSeq = seq - seq[termIdx] + term(and(psi, phi), a, false);
-				MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
-				if (subProof != noProof()) {
-					seq[termIdx].active = true;
-					return proof(CloGUnaryInf(seq, testR(), subProof.p));
-				}
+	
+		MaybeSequent resSeq = applyTest(seq, termIdx);
+		if (resSeq != noSeq()) {
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, testR(), subProof.p));
 			}
 		}
+	}
 		
 	return noProof();
+}
+
+/* A function applying the dIter rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the dIter rule to,
+ *         and the list of closure sequents
+ * Output: the sequent resulting from applying the dIter rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<gamma^x>phi)^a".
+ * Each of the names in the label a must be smaller than or equal to this
+ * "(<gamma^x>phi)^a" fixpoint formula, according to the order on fixpoint formulae
+ * defined in the literature.
+ * 
+ * If these conditions is met, the specified term in the given sequent is replaced by
+ * the term "(phi & <gamma><gamma^x>phi)^a" and the sequent is returned. Otherwise,
+ * noSeq() is returned.
+ */
+MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
+	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+	
+		for (CloGName x <- a)
+			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
+				return noSeq();
+	
+		println("applied dIter");
+		seq[termIdx] = term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
 }
 
 /* 
  * A function applying the dIter rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<gamma^x>phi)^a".
- * Each of the names in the label a must be smaller than or equal to this
- * "<gamma^x>phi" fixpoint formula, according to the order on fixpoint formulae
- * defined in the literature.
- * 
- * If these conditions are met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(phi & <gamma><gamma^x>phi)^a". If a subproof is found, A CloGUnaryInf with
- * the resulting subproof, and the applied dIterR() rule is returned. Otherwise,
- * noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the dIter
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
+ * and a CloGUnaryInf with the resulting subproof, and the applied dIterR() rule is returned.
+ * Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {	
-			bool nextTerm = false;
-				
-			for (CloGName x <- a)
-				if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
-					nextTerm = true;
-			
-			if (nextTerm) continue;
-			
+	
+		MaybeSequent resSeq = applyDIter(seq, termIdx, cloSeqs);
+		if (resSeq != noSeq()) {
 			fpSeqs += [seq];
-			
-			println("applied dIter");
-			CloGSequent resSeq =  seq - seq[termIdx] + term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a, false);
-			
-			MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dIterR(), subProof.p));
 			}
-		}				
+		}
 	}	
-	return noProof();	
+	return noProof();
 }
 
+/* A function applying the dTest rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the dTest rule to
+ * Output: the sequent resulting from applying the dTest rule
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<psi!>phi)^a".
+ * 
+ * If this condition is met, the specified term in the given sequent is replaced by
+ * the term "(phi | psi)^a" and the sequent is returned. Otherwise, noSeq() is returned.
+ */
+MaybeSequent applyDTest(CloGSequent seq, int termIdx) {
+	if (term(\mod(dTest(GameLog psi), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+		println("applied dTest");
+		seq[termIdx] = term(or(psi, phi), a, false);
+		return sequent(seq);
+	}
+	return noSeq();
+}
 
 /* 
  * A function applying the test rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<psi!>phi)^a".
- * 
- * If this condition is met, a proof search is done on the resulting sequent,
- * which is the given sequent, where the specified term is replaced by
- * "(phi | psi)^a". If a subproof is found, A CloGUnaryInf with the resulting
- * subproof, and the applied dTestR() rule is returned. Otherwise, noProof()
- * is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the dTest
+ * rule. For all successful applications, a proof search is done on the resulting sequent,
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
+ * dTestR() rule is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		    if (term(\mod(dTest(GameLog psi), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-				println("applied dTest");
-				CloGSequent resSeq = seq - seq[termIdx] + term(or(psi, phi), a, false);
-				MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
-				if (subProof != noProof()) {
-					seq[termIdx].active = true;
-					return proof(CloGUnaryInf(seq, dTestR(), subProof.p));
-				}
+	
+		MaybeSequent resSeq = applyDTest(seq, termIdx);
+		if (resSeq != noSeq()) {
+			fpSeqs += [seq];
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, dTestR(), subProof.p));
 			}
 		}
+	}
 		
 	return noProof();
+}
+
+/* A function applying the clo rule to a term
+ * 
+ * Input:  the sequent and the index of the term therein to apply the clo rule to,
+ *         and the list of closure sequents
+ * Output: a tuple containing the sequent resulting from applying the clo rule, and
+ *         the new name associated with the sequent
+ *
+ * For the rule to be applied, the term at the specified index must be of
+ * the form "(<gamma^x>phi)^a".
+ * Each of the names in the label a must be smaller than or equal to this
+ * "(<gamma^x>phi)^a" fixpoint formula, according to the order on fixpoint formulae
+ * defined in the literature.
+ *
+ * If these conditions are met, a new name is created, x_n, where n is the
+ * number of closure sequents (or closure sequents names, named x_0 to x_{n-1}),
+ * and the specified term in the given sequent is replaced by the term
+ * "(phi & <gamma><gamma^x>phi)^{a + x_n}" and a pair of this sequent, and the
+ * new associated name is returned. Otherwise, a pair of noSeq() and an empty name
+ * is returned.
+ */
+tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
+	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
+	
+		bool nextTerm = false;
+		for (CloGName x <- a)
+			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
+				nextTerm = true;
+		if (nextTerm) return <noSeq(), name("")>;
+				
+		CloGName newName = nameS("x", size(cloSeqs));
+	
+		println("applied clo");
+		return <sequent(seq - seq[termIdx] + term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a + newName, false)), newName>;
+	}
+	return <noSeq(), name("")>;
 }
 
 /* 
  * A function applying the clo rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For the rule to be applied, the term at the specified index must be of
- * the form "(<gamma^x>phi)^a".
- * Each of the names in the label a must be smaller than or equal to this
- * "<gamma^x>phi" fixpoint formula, according to the order on fixpoint formulae
- * defined in the literature.
- *  
- * If these conditions are met, a new label is created, x_n, where n is the
- * number of closure sequents (or closure sequents names, named x_0 to x_{n-1}).
- * This label is added to the closure sequents as the key to the associated context
- * sequence and the index of the term in the sequent that contains the relevant
- * fixpoint formula.
- *
- * Then, a proof search is done on the resulting sequent, which is the given
- * sequent, where the specified term is replaced by "(phi & <gamma><gamma^x>phi)^a".
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the
- * applied clo() rule is returned. Otherwise, noProof() is returned.
+ * For any of the terms in the sequent, the algorithm checks tries to apply the clo
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
+ * and the new name associated with the closure rule application is added to the closure
+ * sequents as the key to the associated context sequence and the index of the term in the
+ * sequent that contains the relevant fixpoint formula.
+ * 
+ * A CloGUnaryInf with the resulting subproof, and the applied clo() rule (with the new name)
+ * is returned. Otherwise, noProof() is returned.
  */
 MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
+
 	for (int termIdx <- [0 .. size(seq)]) {
-		if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {	
-			bool nextTerm = false;
-				
-			for (CloGName x <- a)
-				if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
-					nextTerm = true;
-			
-			if (nextTerm) continue;
-			
-			CloGName newName = nameS("x", size(cloSeqs));
+	
+		MaybeSequent resSeq;
+		CloGName newName;
+	
+		<resSeq, newName> = applyClo(seq, termIdx, cloSeqs);
+		if (resSeq != noSeq()) {
 			cloSeqs += (newName: <seq, termIdx>);
-			
 			fpSeqs += [seq];
-			
-			println("applied clo");
-			CloGSequent resSeq =  seq - seq[termIdx] + term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a + newName, false);
-			
-			MaybeProof subProof = proofSearch(resSeq, cloSeqs, fpSeqs, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, clo(newName), subProof.p));
 			}
-		}				
-	}	
+		}
+	}
+		
 	return noProof();	
 }
