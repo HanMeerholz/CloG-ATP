@@ -81,14 +81,26 @@ test bool fpLessThanOrEqualTo_test_5() =
 	fpLessThanOrEqualTo(\mod(iter(atomG(agame("a"))), atomP(prop("p"))),
 	                    \mod(dIter(dChoice(iter(atomG(agame("a"))), atomG(agame("b")))),
 	                         \mod(iter(atomG(agame("a"))), atomP(prop("q"))))) == false;
+// <a*>p !<= <a^x>p
+test bool fpLessThanOrEqualTo_test_6() = 
+	fpLessThanOrEqualTo(\mod(iter(atomG(agame("a"))), atomP(prop("p"))),
+	                    \mod(dIter(atomG(agame("a"))), atomP(prop("p")))) == false;
+// <a*>p !<= <a^x>p
+test bool fpLessThanOrEqualTo_test_7() = 
+	fpLessThanOrEqualTo(\mod(iter(atomG(agame("a"))), atomP(prop("p"))),
+	                    \mod(dIter(atomG(agame("a"))), atomP(prop("p")))) == false;
+// <a*^x>p <= <a*>p
+test bool fpLessThanOrEqualTo_test_8() = 
+	fpLessThanOrEqualTo(\mod(dIter(iter(atomG(agame("a")))), atomP(prop("p"))),
+	                    \mod(iter(atomG(agame("a"))), atomP(prop("p")))) == true;
 // p <= q should throw an exception
-test bool fpLessThanOrEqualTo_test_6() {
+test bool fpLessThanOrEqualTo_test_9() {
 	try fpLessThanOrEqualTo(atomP(prop("p")), atomP(prop("q")));
 	catch IllegalArgument("Error: cannot apply fixpoint ordering on non-fixpoint formulae!"): return true;
 	return false;
 }
 // <a>p <= <b>q should throw an exception
-test bool fpLessThanOrEqualTo_test_7() {
+test bool fpLessThanOrEqualTo_test_10() {
 	try fpLessThanOrEqualTo(\mod(atomG(agame("a")), atomP(prop("p"))), \mod(atomG(agame("b")), atomP(prop("q"))));
 	catch IllegalArgument("Error: cannot apply fixpoint ordering on non-fixpoint formulae!"): return true;
 	return false;
