@@ -63,6 +63,33 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
  * Output: either the CloGProof found after applying the rule to the sequent,
  *         or noProof() if no such proof could be found
  */
+ 
+///* A function applying the modm rule to a term
+// * 
+// * Input:  the sequent to apply the modm rule to
+// * Output: the sequent resulting from applying the modm rule
+// *
+// * For the rule to be applied, there must be two terms in the sequent, of forms "<g>phi^a" and
+// * "<g^d>psi^b"
+// * 
+// * If these condition are met, a sequent containing "phi^a" and "psi^b" is returned.
+// */
+//MaybeSequent applyModm(CloGSequent seq) {
+//
+//	if (size(seq) != 2)
+//		return noSeq();
+//		
+//	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[0] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[1]) {
+//		println("applied modm");
+//		return sequent([term(\mod(g, phi), a, false), term(\mod(dual(g), psi), b, false)]);
+//	}
+//	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[1] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[0]) {
+//		println("applied modm");
+//		return sequent([term(phi, a, false), term(psi, b, false)]);
+//	}
+//	
+//	return noSeq();
+//}
 
 /*
  * A function applying the modm rule to a sequent, after some potential 
@@ -550,16 +577,15 @@ MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
 	
-		bool nextTerm = false;
 		for (CloGName x <- a)
-			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
-				nextTerm = true;
-		if (nextTerm) return <noSeq(), name("")>;
-				
+			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
+				return <noSeq(), name("")>;
+
 		CloGName newName = nameS("x", size(cloSeqs));
 	
 		println("applied clo");
-		return <sequent(seq - seq[termIdx] + term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a + newName, false)), newName>;
+		seq[termIdx] = term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a + newName, false);
+		return <sequent(seq), newName>;
 	}
 	return <noSeq(), name("")>;
 }

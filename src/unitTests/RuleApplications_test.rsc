@@ -897,9 +897,9 @@ test bool applyIter_test_21() {
 	
 	return applyIter(input, 0, ()) == output;
 }
-// <(p*)^x>q^[]
+// <(a*)^x>p^[]
 test bool applyIter_test_22() {
-	CloGSequent input = [term(\mod(dIter(iter(dTest(atomP(prop("p"))))), atomP(prop("q"))), [], false)];
+	CloGSequent input = [term(\mod(dIter(iter(atomG(agame("a")))), atomP(prop("p"))), [], false)];
 	MaybeSequent output = noSeq();
 	
 	return applyIter(input, 0, ()) == output;
@@ -1063,7 +1063,7 @@ test bool applyDIter_test_19() {
 	return applyDIter(input, 1, ()) == output;
 }
 // [<a^x>p^[] <b^x>q^[]] (apply to both terms; empty closure map)
-test bool applyIter_test_20() {
+test bool applyDIter_test_20() {
 	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
 	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("b")), \mod(dIter(atomG(agame("b"))), atomP(prop("q"))))), [], false)]);
 	
@@ -1076,10 +1076,208 @@ test bool applyDIter_test_21() {
 	
 	return applyDIter(input, 0, ()) == output;
 }
-// <(p*)^x>q^[]
-test bool applyIter_test_22() {
-	CloGSequent input = [term(\mod(dIter(iter(dTest(atomP(prop("p"))))), atomP(prop("q"))), [], false)];
+// <(a^x)*>p^[]
+test bool applyDIter_test_22() {
+	CloGSequent input = [term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)];
 	MaybeSequent output = noSeq();
 	
-	return applyIter(input, 0, ()) == output;
+	return applyDIter(input, 0, ()) == output;
+}
+
+
+
+// Apply clo
+
+// p^[] (empty closure map)
+test bool applyClo_test_1() {
+	CloGSequent input = [term(atomP(prop("p")), [], false)];
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <a>p^[] (empty closure map)
+test bool applyClo_test_2() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <a^x>p^[] (empty closure map)
+test bool applyClo_test_3() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x",0)], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <a^x>p^[] (closure map contains fp formula for x_0: <a^x>p)
+test bool applyClo_test_4() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)];
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 1)], false)]), nameS("x", 1)>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>~p^[] (empty closure map)
+test bool applyClo_test_5() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), neg(atomP(prop("p")))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(neg(atomP(prop("p"))), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), neg(atomP(prop("p")))))), [nameS("x", 0)], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <(a^d)^x>p^[] (empty closure map)
+test bool applyClo_test_6() {
+	CloGSequent input = [term(\mod(dIter(dual(atomG(agame("a")))), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(dual(atomG(agame("a"))), \mod(dIter(dual(atomG(agame("a")))), atomP(prop("p"))))), [nameS("x", 0)], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <a^x>p^x_0 (closure map contains fp formula for x_0: <a^x>p == <a^x>p)
+test bool applyClo_test_7() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0)], false)];
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0), nameS("x", 1)], false)]), nameS("x", 1)>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^x_0 (closure map contains fp formula for x_0: <a^x*>p < <a^x>p)
+test bool applyClo_test_8() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0)], false)];
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0), nameS("x", 1)], false)]), nameS("x", 1)>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^x_0 (closure map contains fp formula for x_0: <b*>p !<= <a^x>p)
+test bool applyClo_test_9() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0)], false)];
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(iter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^x_1 (closure map contains fp formula for x_0: <b*>p !<= <a^x>p and x_1: <a^x*>p < <a^x>p)
+test bool applyClo_test_10() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 1)], false)];
+	CloSeqs cloSeqs = (
+		nameS("x", 0): <[term(\mod(iter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>,
+		nameS("x", 1): <[term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>
+	);
+	
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 1), nameS("x", 2)], false)]), nameS("x", 2)>;
+
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^x_0 (closure map contains fp formula for x_0: <a^x>p = <a^x>p and x_1: <b*>p !<= <a^x>p)
+test bool applyClo_test_11() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0)], false)];
+	CloSeqs cloSeqs = (
+		nameS("x", 0): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>,
+		nameS("x", 1): <[term(\mod(iter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>
+	);
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0), nameS("x", 2)], false)]), nameS("x", 2)>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^{x_0, x_1} (closure map contains fp formula for x_0: <a^x>p = <a^x>p and x_1: <(a^x;b)*>q < <a^x>p)
+test bool applyClo_test_12() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0), nameS("x", 1)], false)];
+	CloSeqs cloSeqs = (
+		nameS("x", 0): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>,
+		nameS("x", 1): <[term(\mod(iter(concat(dIter(atomG(agame("a"))), atomG(agame("b")))), atomP(prop("q"))), [nameS("x", 0)], false)], 0>
+	);
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0), nameS("x", 1), nameS("x", 2)], false)]), nameS("x", 2)>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// <a^x>p^{x_0, x_1} (closure map contains fp formula for x_0: <a^x*>p < <a^x>p and x_1: <b*>p !<= <a^x>p)
+test bool applyClo_test_13() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [nameS("x", 0), nameS("x", 1)], false)];
+	CloSeqs cloSeqs = (
+		nameS("x", 0): <[term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>,
+		nameS("x", 1): <[term(\mod(iter(atomG(agame("b"))), atomP(prop("p"))), [nameS("x", 0)], false)], 0>
+	);
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, cloSeqs) == output;
+}
+// [<a^x>p^[] q^[]] (apply to first term; empty closure map)
+test bool applyClo_test_14() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0)], false), term(atomP(prop("q")), [], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// [<a^x>p^[] q^[]] (apply to second term; empty closure map)
+test bool applyClo_test_15() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 1, ()) == output;
+}
+// [p^[] <a^x>q^[]] (apply to second term; empty closure map)
+test bool applyClo_test_16() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(\mod(dIter(atomG(agame("a"))), atomP(prop("q"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(atomP(prop("p")), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("q"))))), [nameS("x", 0)], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 1, ()) == output;
+}
+// [p^[] <a^x>q^[] r^[]] (apply to second term; empty closure map)
+test bool applyClo_test_17() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(\mod(dIter(atomG(agame("a"))), atomP(prop("q"))), [], false), term(atomP(prop("r")), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(atomP(prop("p")), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("q"))))), [nameS("x", 0)], false), term(atomP(prop("r")), [], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 1, ()) == output;
+}
+// [<a^x>p^[] <b^x>q^[]] (apply to first term; empty closure map)
+test bool applyClo_test_18() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0)], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// [<a^x>p^[] <b^x>q^[]] (apply to second term; empty closure map)
+test bool applyClo_test_19() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <sequent([term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("b")), \mod(dIter(atomG(agame("b"))), atomP(prop("q"))))), [nameS("x", 0)], false)]), nameS("x", 0)>;
+	
+	return applyClo(input, 1, ()) == output;
+}
+// [<a^x>p^[] <b^x>q^[]] (apply to both terms; empty closure map)
+test bool applyClo_test_20() {
+	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
+	tuple[MaybeSequent, CloGName] output1 = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0)], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)]), nameS("x", 0)>;
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output2 = <sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [nameS("x", 0)], false), term(and(atomP(prop("q")), \mod(atomG(agame("b")), \mod(dIter(atomG(agame("b"))), atomP(prop("q"))))), [nameS("x", 1)], false)]), nameS("x", 1)>;
+	
+	tuple[MaybeSequent, CloGName] result1 = applyClo(input, 0, ());
+	tuple[MaybeSequent, CloGName] result2 = applyClo(result1[0].seq, 1, cloSeqs);
+	
+	return result1 == output1 && result2 == output2;
+}
+// [<a^x^x>p^[]] (apply twice (with an and application in between))
+test bool applyClo_test_21() {
+	CloGSequent input = [term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output1 = <sequent([term(and(atomP(prop("p")), \mod(dIter(atomG(agame("a"))), \mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))))), [nameS("x", 0)], false)]), nameS("x", 0)>;
+	CloSeqs cloSeqs = (nameS("x", 0): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>);
+	tuple[MaybeSequent, CloGName] output2 = <sequent([term(and(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))),\mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), \mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p")))))), [nameS("x", 0), nameS("x", 1)],false)]), nameS("x", 1)>;
+	
+	tuple[MaybeSequent, CloGName] result1 = applyClo(input, 0, ());
+	MaybeSequents result2 = applyAnd(result1[0].seq, 0);
+	tuple[MaybeSequent, CloGName] result3 = applyClo(result2.right, 0, cloSeqs);
+	
+	return result1 == output1 && result3 == output2;
+}
+// <a||b>p^[]
+test bool applyClo_test_22() {
+	CloGSequent input = [term(\mod(choice(atomG(agame("a")), atomG(agame("b"))), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, ()) == output;
+}
+// <(a^x)*>p^[]
+test bool applyClo_test_23() {
+	CloGSequent input = [term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)];
+	tuple[MaybeSequent, CloGName] output = <noSeq(), name("")>;
+	
+	return applyClo(input, 0, ()) == output;
 }
