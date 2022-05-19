@@ -8,18 +8,37 @@ import GLASTs;
 import Map;
 import List;
 import ProofSearch;
-import Exception;
+//import Exception;
 
 import IO;
 
-//CloGSequent applyAx1(CloGSequent seq) {
-//	if (size(seq) != 2) throw IllegalArgument("Error: incorrect number of terms for ax1 application");
-//	
-//	if (term(atomP(Prop p), []) := seq[0] && term(neg(atomP(p)), []) := seq[1]) return [];
-//	if (term(atomP(Prop p), []) := seq[1] && term(neg(atomP(p)), []) := seq[0]) return [];
-//	
-//	throw IllegalArgument("Error: incorrect form of terms for ax1 application");
-//}
+/* 
+ * A function applying the ax1 axiom to a term
+ * 
+ * Input:  the sequent
+ * Output: the sequent resulting from applying the ax1 axiom
+ *
+ * For the axiom to be applied, there must be exactly two sequents of the forms
+ * "p^[]" and "~p^[]".
+ * 
+ * If these condition are met, an empty sequent (the result of applying the ax1
+ * axiom is returned. Otherwise, noSeq() is returned.
+ */
+MaybeSequent applyAx1(CloGSequent seq) {
+	if (size(seq) != 2) return noSeq();
+	
+	if (term(atomP(Prop p), [], _) := seq[0] && term(neg(atomP(p)), [], _) := seq[1]) {
+		println("applied ax1");
+		return sequent([]);
+	}
+	
+	if (term(atomP(Prop p), [], _) := seq[1] && term(neg(atomP(p)), [], _) := seq[0]) {
+		println("applied ax1");
+		return sequent([]);
+	}
+	
+	return noSeq();
+}
 
 /*
  * A function applying the ax1 rule after some potential weakening and
@@ -37,15 +56,17 @@ import IO;
  * 
  * If no such terms exist, noProof() is returned.
  */
-MaybeProof tryApplyAx1(CloGSequent seq) {
+MaybeProof tryApplyAx1(CloGSequent seq, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		if (term(atomP(Prop p), _, _) := seq[termIdx]) {
 			for (int termIdx2 <- [0 .. size(seq)]) {
 				if (term(neg(atomP(p)), _, _) := seq[termIdx2]) {
-					println("applied ax1");
+					
 					CloGSequent weakenTo = [term(atomP(p), [], true), term(neg(atomP(p)), [], true)];
 					
-					return proofSearchWeakExp(seq, weakenTo, CloGUnaryInf(weakenTo, ax1(), CloGLeaf()));
+					resSeq = applyAx1(weakenTo);
+					if (resSeq != noSeq())
+						return proofSearchWeakExp(seq, weakenTo, CloGUnaryInf(weakenTo, ax1(), CloGLeaf()), depth - 1);
 				}
 			}
 		}
@@ -64,32 +85,32 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
  *         or noProof() if no such proof could be found
  */
  
-///* A function applying the modm rule to a term
-// * 
-// * Input:  the sequent to apply the modm rule to
-// * Output: the sequent resulting from applying the modm rule
-// *
-// * For the rule to be applied, there must be two terms in the sequent, of forms "<g>phi^a" and
-// * "<g^d>psi^b"
-// * 
-// * If these condition are met, a sequent containing "phi^a" and "psi^b" is returned.
-// */
-//MaybeSequent applyModm(CloGSequent seq) {
-//
-//	if (size(seq) != 2)
-//		return noSeq();
-//		
-//	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[0] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[1]) {
-//		println("applied modm");
-//		return sequent([term(\mod(g, phi), a, false), term(\mod(dual(g), psi), b, false)]);
-//	}
-//	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[1] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[0]) {
-//		println("applied modm");
-//		return sequent([term(phi, a, false), term(psi, b, false)]);
-//	}
-//	
-//	return noSeq();
-//}
+/* A function applying the modm rule to a term
+ * 
+ * Input:  the sequent to apply the modm rule to
+ * Output: the sequent resulting from applying the modm rule
+ *
+ * For the rule to be applied, there must be two terms in the sequent, of forms "<g>phi^a" and
+ * "<g^d>psi^b"
+ * 
+ * If these conditions are met, a sequent containing "phi^a" and "psi^b" is returned.
+ */
+MaybeSequent applyModm(CloGSequent seq) {
+
+	if (size(seq) != 2)
+		return noSeq();
+		
+	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[0] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[1]) {
+		println("applied modm");
+		return sequent([term(phi, a, false), term(psi, b, false)]);
+	}
+	if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[1] && term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[0]) {
+		println("applied modm");
+		return sequent([term(psi, b, false), term(phi, a, false)]);
+	}
+	
+	return noSeq();
+}
 
 /*
  * A function applying the modm rule to a sequent, after some potential 
@@ -103,22 +124,26 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
  * If no proof could be found in this proof search, or there are no 2 terms
  * of the appropriate form, noSeq() is returned.
  */
-MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		if (term(\mod(Game g, GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
 			for (int termIdx2 <- [0 .. size(seq)]) {
-				if (term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[termIdx2]) {				
-					CloGSequent resSeq = termIdx < termIdx2 ? [term(phi, a, false), term(psi, b, false)] : [term(psi, b, false), term(phi, a, false)];
-					subProof = proofSearch(resSeq, cloSeqs, fpAppl, depth - 1);
-					if (subProof != noProof()) {
-						CloGSequent weakenTo = termIdx < termIdx2 ? [term(\mod(g, phi), a, true), term(\mod(dual(g), psi), b, true)] : [term(\mod(dual(g), psi), b, true), term(\mod(g, phi), a, true)];
-						subProof2 = CloGUnaryInf(weakenTo, modm(), subProof.p);
-						
-						//println("subProof2 = <subProof2>");
-						
-						weakenTo[0].active = false;
-						weakenTo[1].active = false;
-						return proofSearchWeakExp(seq, weakenTo, subProof2);
+				if (term(\mod(dual(g), GameLog psi), list[CloGName] b, _) := seq[termIdx2]) {
+				
+					CloGSequent weakenTo = termIdx < termIdx2
+									     ? [term(\mod(g, phi), a, false), term(\mod(dual(g), psi), b, false)]
+									     : [term(\mod(dual(g), psi), b, false), term(\mod(g, phi), a, false)];
+									     
+					MaybeSequent resSeq = applyModm(weakenTo);
+					
+					if (resSeq != noSeq()) {
+						subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+						if (subProof != noProof()) {
+							resSeq.seq[0].active = true;
+							resSeq.seq[1].active = true;
+							subProof2 = CloGUnaryInf(weakenTo, modm(), subProof.p);
+							return proofSearchWeakExp(seq, weakenTo, subProof2, depth);
+						}
 					}
 				}
 			}
@@ -163,12 +188,12 @@ MaybeSequents applyAnd(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGBinaryInf with the resulting subproofs, is returned.
  * Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {		
+MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {		
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequents resSeqs = applyAnd(seq, termIdx);
 		if (resSeqs != noSeqs()) {
-			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs, fpAppl, depth - 1);
-			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs, fpSeqs, depth - 1);
+			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs, fpSeqs, depth - 1);
 			if (subProofL != noProof() && subProofR != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
@@ -194,7 +219,7 @@ MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, 
 MaybeSequent applyOr(CloGSequent seq, int termIdx) {
 	if (term(or(GameLog phi, GameLog psi), list[CloGName] a, _) := seq[termIdx]) {
 		println("applied or");
-		return sequent(seq[0 .. termIdx] +term(phi, a, false) + term(psi, a, false) + seq[termIdx+1 .. size(seq)]);
+		return sequent(seq[0 .. termIdx] + term(phi, a, false) + term(psi, a, false) + seq[termIdx+1 .. size(seq)]);
 	}
 	return noSeq();
 }
@@ -208,11 +233,11 @@ MaybeSequent applyOr(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied orR()
  * rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {	
+MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {	
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequent resSeq = applyOr(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, orR(), subProof.p));		
@@ -254,11 +279,11 @@ MaybeSequent applyChoice(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
  * choiceR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequent resSeq = applyChoice(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, choiceR(), subProof.p));
@@ -300,11 +325,11 @@ MaybeSequent applyDChoice(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
  * dChoiceR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequent resSeq = applyDChoice(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dChoiceR(), subProof.p));
@@ -314,6 +339,7 @@ MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAp
 		
 	return noProof();
 }
+
 
 /* 
  * A function applying the concat rule to a term
@@ -346,11 +372,11 @@ MaybeSequent applyConcat(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
  * concatR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequent resSeq = applyConcat(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, concatR(), subProof.p));
@@ -386,7 +412,7 @@ MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpApp
 //		
 //	return noProof();
 //}
-//
+
 ///* 
 // * 
 // */
@@ -436,12 +462,8 @@ MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpApp
  * the term "(phi | <gamma><gamma*>phi)^a" and the sequent is returned. Otherwise,
  * noSeq() is returned.
  */
-MaybeSequent applyIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[CloGTerm] fpAppl) {
+MaybeSequent applyIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 	if (term(\mod(iter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-	
-		for (CloGTerm term <- fpAppl)
-			if (seq[termIdx].s == term.s && seq[termIdx].label >= term.label)
-				return noSeq();
 	
 		for (CloGName x <- a)
 			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(iter(gamma), phi)))
@@ -464,14 +486,14 @@ MaybeSequent applyIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[CloGT
  * and a CloGUnaryInf with the resulting subproof, and the applied iterR() rule is returned.
  * Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 	
-		MaybeSequent resSeq = applyIter(seq, termIdx, cloSeqs, fpAppl);
+		MaybeSequent resSeq = applyIter(seq, termIdx, cloSeqs);
 		
 		if (resSeq != noSeq()) {
-			fpAppl += seq[termIdx];
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			fpSeqs += [seq];
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, iterR(), subProof.p));
@@ -511,12 +533,12 @@ MaybeSequent applyTest(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
  * testR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 	
 		MaybeSequent resSeq = applyTest(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, testR(), subProof.p));
@@ -544,12 +566,8 @@ MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl,
  * the term "(phi & <gamma><gamma^x>phi)^a" and the sequent is returned. Otherwise,
  * noSeq() is returned.
  */
-MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[CloGTerm] fpAppl) {
+MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-	
-		for (CloGTerm term <- fpAppl)
-			if (seq[termIdx].s == term.s && seq[termIdx].label >= term.label)
-				return noSeq();
 	
 		for (CloGName x <- a)
 			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
@@ -572,12 +590,12 @@ MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[CloG
  * and a CloGUnaryInf with the resulting subproof, and the applied dIterR() rule is returned.
  * Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 	
-		MaybeSequent resSeq = applyDIter(seq, termIdx, cloSeqs, fpAppl);
+		MaybeSequent resSeq = applyDIter(seq, termIdx, cloSeqs);
 		if (resSeq != noSeq()) {
-			fpAppl += seq[termIdx];
+			fpSeqs += [seq];
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
@@ -618,12 +636,12 @@ MaybeSequent applyDTest(CloGSequent seq, int termIdx) {
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
  * dTestR() rule is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
 	
 		MaybeSequent resSeq = applyDTest(seq, termIdx);
 		if (resSeq != noSeq()) {
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dTestR(), subProof.p));
@@ -655,11 +673,8 @@ MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl
  * new associated name is returned. Otherwise, a pair of noSeq() and an empty name
  * is returned.
  */
-tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[CloGTerm] fpAppl) {
+tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-		for (CloGTerm term <- fpAppl)
-			if (seq[termIdx].s == term.s && seq[termIdx].label >= term.label)
-				return <noSeq(), name("")>;
 	
 		for (CloGName x <- a)
 			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
@@ -688,16 +703,16 @@ tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs clo
  * A CloGUnaryInf with the resulting subproof, and the applied clo() rule (with the new name)
  * is returned. Otherwise, noProof() is returned.
  */
-MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGTerm] fpAppl, int depth) {
+MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 
 	for (int termIdx <- [0 .. size(seq)]) {
 	
-		tuple[MaybeSequent resSeq, CloGName newName] res = applyClo(seq, termIdx, cloSeqs, fpAppl);
+		tuple[MaybeSequent resSeq, CloGName newName] res = applyClo(seq, termIdx, cloSeqs);
 	
 		if (res.resSeq != noSeq()) {
 			cloSeqs += (res.newName: <seq, termIdx>);
-			fpAppl += seq[termIdx];
-			MaybeProof subProof = proofSearch(res.resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			fpSeqs += [seq];
+			MaybeProof subProof = proofSearch(res.resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, clo(res.newName), subProof.p));
