@@ -5,6 +5,109 @@ import GLASTs;
 import ATP_Base;
 import IO;
 
+// Apply Ax1
+
+// p^[]
+test bool applyAx1_test_1() {
+	CloGSequent input = [term(atomP(prop("p")), [], false)];	
+	return applyAx1(input) == noSeq();
+}
+// p^[] ~p^[]
+test bool applyAx1_test_2() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false)];
+	return applyAx1(input) == sequent([]);
+}
+// ~p^[] p^[]
+test bool applyAx1_test_3() {
+	CloGSequent input = [term(neg(atomP(prop("p"))), [], false), term(atomP(prop("p")), [], false)];
+	return applyAx1(input) == sequent([]);
+}
+// p^[] ~q^[]
+test bool applyAx1_test_4() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("q"))), [], false)];
+	return applyAx1(input) == noSeq();
+}
+// p^[] ~p^[] q^[]
+test bool applyAx1_test_5() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
+	return applyAx1(input) == noSeq();
+}
+// p^[] ~p^x
+test bool applyAx1_test_6() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [name("x")], false)];
+	return applyAx1(input) == noSeq();
+}
+// ~p^[] ~(~p)^[]
+test bool applyAx1_test_7() {
+	CloGSequent input = [term(neg(atomP(prop("p"))), [], false), term(neg(neg(atomP(prop("p")))), [], false)];
+	return applyAx1(input) == noSeq();
+}
+// (p|~p)^[]
+test bool applyAx1_test_8() {
+	CloGSequent input = [term(or(atomP(prop("p")), neg(atomP(prop("p")))), [], false)];
+	return applyAx1(input) == noSeq();
+}
+
+
+// Apply Modm
+
+// p^[]
+test bool applyModm_test_1() {
+	CloGSequent input = [term(atomP(prop("p")), [], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+// <a>p^[]
+test bool applyModm_test_2() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+// <a>p^x <a>q^y
+test bool applyModm_test_3() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [name("x")], false), term(\mod(atomG(agame("a")), atomP(prop("q"))), [name("y")], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+// <a>p^x <a^d>q^y
+test bool applyModm_test_4() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [name("x")], false), term(\mod(dual(atomG(agame("a"))), atomP(prop("q"))), [name("y")], false)];
+	MaybeSequent output = sequent([term(atomP(prop("p")), [name("x")], false), term(atomP(prop("q")), [name("y")], false)]);
+	
+	return applyModm(input) == output;
+}
+// <a^d>p^x <a>q^y
+test bool applyModm_test_5() {
+	CloGSequent input = [term(\mod(dual(atomG(agame("a"))), atomP(prop("p"))), [name("x")], false), term(\mod(atomG(agame("a")), atomP(prop("q"))), [name("y")], false)];
+	MaybeSequent output = sequent([term(atomP(prop("p")), [name("x")], false), term(atomP(prop("q")), [name("y")], false)]);
+	
+	return applyModm(input) == output;
+}
+// <a>p^x <b^d>q^y
+test bool applyModm_test_6() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [name("x")], false), term(\mod(dual(atomG(agame("b"))), atomP(prop("q"))), [name("y")], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+// <a>p^x <a^d>q^y r^[]
+test bool applyModm_test_7() {
+	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [name("x")], false), term(\mod(dual(atomG(agame("a"))), atomP(prop("q"))), [name("y")], false), term(atomP(prop("r")), [], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+// (<a>p | <a^d>q)^x
+test bool applyModm_test_8() {
+	CloGSequent input = [term(or(\mod(atomG(agame("a")), atomP(prop("p"))), \mod(dual(atomG(agame("a"))), atomP(prop("q")))), [name("x")], false)];
+	MaybeSequent output = noSeq();
+	
+	return applyModm(input) == output;
+}
+
 // Apply Or
 
 // p^[]
