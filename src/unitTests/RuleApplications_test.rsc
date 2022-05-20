@@ -48,6 +48,102 @@ test bool applyAx1_test_8() {
 	return applyAx1(input) == noSeq();
 }
 
+// p^[] ~p^[] q^[]
+test bool tryApplyAx1_test_1() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false), term(atomP(prop("q")), [], true)];
+	CloGSequent seq2 = [term(atomP(prop("p")), [], true), term(neg(atomP(prop("p"))), [], true)];
+	
+	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, ax1(), CloGLeaf())));
+	println(tryApplyAx1(input, -1));
+	
+	return tryApplyAx1(input, -1) == output;
+}
+
+// q^[] p^[] ~p^[]
+test bool tryApplyAx1_test_2() {
+	CloGSequent input = [term(atomP(prop("q")), [], false), term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("q")), [], true), term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false)];
+	CloGSequent seq2 = [term(atomP(prop("p")), [], true), term(neg(atomP(prop("p"))), [], true)];
+	
+	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, ax1(), CloGLeaf())));
+	
+	return tryApplyAx1(input, -1) == output;
+}
+
+// p^[] q^[] ~p^[]
+test bool tryApplyAx1_test_3() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false), term(neg(atomP(prop("p"))), [], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], true), term(neg(atomP(prop("p"))), [], false)];
+	CloGSequent seq2 = [term(atomP(prop("p")), [], true), term(neg(atomP(prop("p"))), [], true)];
+	
+	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, ax1(), CloGLeaf())));
+	
+	return tryApplyAx1(input, -1) == output;
+}
+
+// p^x ~p^[]
+test bool tryApplyAx1_test_4() {
+	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(neg(atomP(prop("p"))), [], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("p")), [name("x")], true), term(neg(atomP(prop("p"))), [], false)];
+	CloGSequent seq2 = [term(atomP(prop("p")), [], true), term(neg(atomP(prop("p"))), [], true)];
+	
+	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, ax1(), CloGLeaf())));
+	
+	return tryApplyAx1(input, -1) == output;
+}
+
+// p^[] ~p^x
+test bool tryApplyAx1_test_5() {
+	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [name("x")], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [name("x")], true)];
+	CloGSequent seq2 = [term(atomP(prop("p")), [], true), term(neg(atomP(prop("p"))), [], true)];
+	
+	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, ax1(), CloGLeaf())));
+	
+	return tryApplyAx1(input, -1) == output;
+}
+
+// q^x ~p^[x y] r^[] p^y s^[y z]
+test bool tryApplyAx1_test_6() {
+	CloGSequent input = [term(atomP(prop("q")), [name("x")], false), term(neg(atomP(prop("p"))), [name("x"), name("y")], false), term(atomP(prop("r")), [], false), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	
+	CloGSequent seq1 = [term(atomP(prop("q")), [name("x")], true), term(neg(atomP(prop("p"))), [name("x"), name("y")], false), term(atomP(prop("r")), [], false), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	CloGSequent seq2 = [term(neg(atomP(prop("p"))), [name("x"), name("y")], true), term(atomP(prop("r")), [], false), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	CloGSequent seq3 = [term(neg(atomP(prop("p"))), [name("y")], true), term(atomP(prop("r")), [], false), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	CloGSequent seq4 = [term(neg(atomP(prop("p"))), [], false), term(atomP(prop("r")), [], true), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	CloGSequent seq5 = [term(neg(atomP(prop("p"))), [], false), term(atomP(prop("p")), [name("y")], true), term(atomP(prop("s")), [name("y"), name("z")], false)];
+	CloGSequent seq6 = [term(neg(atomP(prop("p"))), [], false), term(atomP(prop("p")), [], false), term(atomP(prop("s")), [name("y"), name("z")], true)];
+	CloGSequent seq7 = [term(neg(atomP(prop("p"))), [], true), term(atomP(prop("p")), [], true)];
+		
+	MaybeProof output = proof(
+		CloGUnaryInf(seq1, weak(), 
+			CloGUnaryInf(seq2, exp(),
+				CloGUnaryInf(seq3, exp(),
+					CloGUnaryInf(seq4, weak(),
+						CloGUnaryInf(seq5, exp(),
+							CloGUnaryInf(seq6, weak(),
+								CloGUnaryInf(seq7, ax1(),
+									CloGLeaf()
+								)
+							)
+						)
+					)
+				)
+			)
+		)
+	);
+	
+	println(output);
+	println(tryApplyAx1(input, -1));
+	
+	return tryApplyAx1(input, -1) == output;
+}
 
 // Apply Modm
 
@@ -107,6 +203,7 @@ test bool applyModm_test_8() {
 	
 	return applyModm(input) == output;
 }
+
 
 // Apply Or
 
