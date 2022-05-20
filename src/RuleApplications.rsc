@@ -62,11 +62,21 @@ MaybeProof tryApplyAx1(CloGSequent seq, int depth) {
 			for (int termIdx2 <- [0 .. size(seq)]) {
 				if (term(neg(atomP(p)), _, _) := seq[termIdx2]) {
 					
-					CloGSequent weakenTo = [term(atomP(p), [], true), term(neg(atomP(p)), [], true)];
+					CloGSequent weakenTo = termIdx < termIdx2
+									     ? [term(atomP(p), [], true), term(neg(atomP(p)), [], true)]
+									     : [term(neg(atomP(p)), [], true), term(atomP(p), [], true)];
 					
 					resSeq = applyAx1(weakenTo);
-					if (resSeq != noSeq())
-						return proofSearchWeakExp(seq, weakenTo, CloGUnaryInf(weakenTo, ax1(), CloGLeaf()), depth - 1);
+					if (resSeq != noSeq()) {
+						weakenTo[0].active = true;
+						weakenTo[1].active = true;
+						
+						resProof = proofSearchWeakExp(seq, weakenTo, depth - 1);
+			 	
+					 	return visit(resProof) {
+					 		case CloGUnaryInf(CloGSequent resSeq, weak(), CloGLeaf()) => CloGUnaryInf(weakenTo, ax1(), CloGLeaf())
+					 	};
+					}
 				}
 			}
 		}
@@ -139,10 +149,14 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 					if (resSeq != noSeq()) {
 						subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 						if (subProof != noProof()) {
-							resSeq.seq[0].active = true;
-							resSeq.seq[1].active = true;
-							subProof2 = CloGUnaryInf(weakenTo, modm(), subProof.p);
-							return proofSearchWeakExp(seq, weakenTo, subProof2, depth);
+							weakenTo[0].active = true;
+							weakenTo[1].active = true;
+							
+							resProof = proofSearchWeakExp(seq, weakenTo, depth - 1);
+			 	
+						 	return visit(resProof) {
+						 		case CloGUnaryInf(CloGSequent resSeq, weak(), CloGLeaf()) => CloGUnaryInf(resSeq, modm(), subProof.p)
+						 	};
 						}
 					}
 				}
@@ -492,7 +506,7 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 		MaybeSequent resSeq = applyIter(seq, termIdx, cloSeqs);
 		
 		if (resSeq != noSeq()) {
-			fpSeqs += [seq];
+			//fpSeqs += [seq];
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
@@ -595,8 +609,8 @@ MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 	
 		MaybeSequent resSeq = applyDIter(seq, termIdx, cloSeqs);
 		if (resSeq != noSeq()) {
-			fpSeqs += [seq];
-			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpAppl, depth - 1);
+			//fpSeqs += [seq];
+			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dIterR(), subProof.p));
@@ -711,7 +725,7 @@ MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	
 		if (res.resSeq != noSeq()) {
 			cloSeqs += (res.newName: <seq, termIdx>);
-			fpSeqs += [seq];
+			//fpSeqs += [seq];
 			MaybeProof subProof = proofSearch(res.resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof()) {
 				seq[termIdx].active = true;

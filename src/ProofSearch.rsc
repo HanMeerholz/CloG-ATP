@@ -79,10 +79,17 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	
 	//if (isEmpty(seq)) return proof(CloGLeaf());
 	
+	//remove the duplicates
+	seq = dup(seq);
+	
+	
 	resProof = tryDisClo(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
 	if (detectCycles(seq, fpSeqs)) return noProof();	
+	
+	
+	fpSeqs += [seq];
 	
 	resProof = tryApplyAx1(seq, depth);
 	if (resProof != noProof()) return resProof;
@@ -150,8 +157,11 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 			 && term(\mod(dIter(gamma), phi), list[CloGName] b, _) := fpSeq[fpIdx]
 			 && b + cn <= a) {
 			 	fpSeq[fpIdx] = term(\mod(dIter(gamma), phi), b + cn, false);
-			 	resProof = proofSearchWeakExp(seq, fpSeq, disClo(fpSeq, cn), depth - 1);
-			    return resProof;
+			 	resProof = proofSearchWeakExp(seq, fpSeq, depth - 1);
+			 	
+			 	return visit(resProof) {
+			 		case CloGUnaryInf(CloGSequent resSeq, weak(), CloGLeaf()) => disClo(resSeq, cn)
+			 	};
 			}
 		}
 	}
@@ -181,7 +191,7 @@ bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
 		    bool foundTerm = false;
 		    
 		    for (int j <- [0 .. size(seq)]) {		    
-		    	if (term(GameLog phi, list[CloGName] a, _) := fpSeq[i] && term(phi, list[CloGName] b, _) := seq[j] && a <= b) {
+		    	if (term(GameLog phi, list[CloGName] a, _) := fpSeq[i] && term(phi, list[CloGName] b, _) := seq[j] && toSet(a) <= toSet(b)) {
 		    		foundTerm = true;
 		    		break;
 		    	}
@@ -198,10 +208,10 @@ bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
  * A function that searches for a proof from one sequent to another, using only the exp and weak
  * rules of CloG. The proof ends in the provided tail of the proof.
  *
- * Input:  the sequent to start from, the sequent to end up on, and the proof for the sequent to
- *         end up on
+ * Input:  the sequent to start from, the sequent to end up on, and the current depth
  * Output: the proof of the first sequent, which applies exp and weak rules to reach the second
- *         sequent, and uses the provided proof of the second sequent for the rest
+ *         sequent, and ends in a (dummy) weakening rule to a CloGLeaf() or noProof() if the
+ *         sequent couldn't be reached
  *
  * For each of terms in the first sequent, if it corresponds to a term in the second term,
  * we apply the exp rule until it has the same label. If this term does not correspond to a
@@ -210,29 +220,29 @@ bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
  * with an empty sequent, when all terms have been removed by weakening, in which case noProof()
  * is returned.
  */
-MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, CloGProof tail, int depth) {
+MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, int depth) {
 	if (depth == 0) return noProof();
 
 	if (isEmpty(seqFrom))
 		return noProof();
 		
-	
-	if (toSet([<termFrom.s, termFrom.label> | termFrom <- seqFrom]) == toSet([<termTo.s, termTo.label> | termTo <- seqTo])) {
-		return proof(tail);
+	seqFrom = dup(seqFrom);
+		
+	if (toSet([<termFrom.s, toSet(termFrom.label)> | termFrom <- seqFrom]) == toSet([<termTo.s, toSet(termTo.label)> | termTo <- seqTo])) {
+		return proof(CloGUnaryInf(seqFrom, weak(), CloGLeaf()));
 	}
 	
 	for (int i <- [0 .. size(seqFrom)]) {
 		termFrom = seqFrom[i];
 		for (int j <- [0 .. size(seqTo)]) {
 			termTo = seqTo[j];
-			if (termFrom.s == termTo.s) {
+			if (termFrom.s == termTo.s && toSet(termFrom.label) > toSet(termTo.label)) {
 				for (CloGName n <- termFrom.label - termTo.label) {
-					println("applied exp");
 									
 					newSeq = seqFrom;
 					newSeq[i] = term(termFrom.s, termFrom.label - n, false);
 					
-					subProof = proofSearchWeakExp(newSeq, seqTo, tail, depth-1);
+					subProof = proofSearchWeakExp(newSeq, seqTo, depth - 1);
 					if (subProof != noProof()) {
 						seqFrom[i].active = true;
 						return proof(CloGUnaryInf(seqFrom, exp(), subProof.p));
@@ -243,7 +253,7 @@ MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, CloGProof 
 		println("applied weak");
 		
 		newSeq = delete(seqFrom, i);
-		subProof = proofSearchWeakExp(newSeq, seqTo, tail, depth-1);
+		subProof = proofSearchWeakExp(newSeq, seqTo, depth-1);
 		if (subProof != noProof()) {
 			seqFrom[i].active = true;
 			return proof(CloGUnaryInf(seqFrom, weak(), subProof.p));
