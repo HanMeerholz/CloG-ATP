@@ -60,12 +60,24 @@ void input2latex(str \in,  str out){
 // (or display "fail!" if no proof could be found).
 void ProofSearch_Tool(str file){
 	CloGSequent seqAST = getCloGAST(file);
-	MaybeProof resProof = proofSearch(seqAST, 20);
+	MaybeProof resProof = proofSearch(seqAST);
 	if (resProof != noProof())
 		LaTeXOutput(resProof.p, outputLoc(file));
 	else
 		println("fail!\n");
 }
+
+// Input .seq file name, do a default proof search on the sequent and display the result in LaTeX
+// (or display "fail!" if no proof could be found).
+void ProofSearch_Tool(str file, int depth){
+	CloGSequent seqAST = getCloGAST(file);
+	MaybeProof resProof = proofSearch(seqAST, depth);
+	if (resProof != noProof())
+		LaTeXOutput(resProof.p, outputLoc(file));
+	else
+		println("fail!\n");
+}
+
 
 // Input .seq file name, do a proof search on the sequent with a given list of names to files with closure
 // sequents and integers corresponding to the relevant fixpoint formula within those sequents, a given
