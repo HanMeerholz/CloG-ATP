@@ -15,7 +15,7 @@ test bool tryDisClo_test_1() {
 	CloSeqs cloSeqs = ();
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ p^[] ]
@@ -27,7 +27,7 @@ test bool tryDisClo_test_2() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^x>p^x ]
@@ -37,7 +37,7 @@ test bool tryDisClo_test_3() {
 	CloSeqs cloSeqs = ();
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^x>p^x ]
@@ -49,7 +49,7 @@ test bool tryDisClo_test_4() {
 	);
 	MaybeProof output = proof(disClo(input, name("x")));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^x>p^[] ]
@@ -61,7 +61,7 @@ test bool tryDisClo_test_5() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^x>p^y ]
@@ -73,7 +73,7 @@ test bool tryDisClo_test_6() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <b^x>p^x ]
@@ -85,7 +85,7 @@ test bool tryDisClo_test_7() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <(a||b)^x>p^x ]
@@ -97,7 +97,7 @@ test bool tryDisClo_test_8() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <(a)^x>p^x ]
@@ -109,7 +109,7 @@ test bool tryDisClo_test_9() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 
@@ -122,7 +122,7 @@ test bool tryDisClo_test_10() {
 	);
 	MaybeProof output = noProof();
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ q^[] <a^x>p^x ]
@@ -134,7 +134,7 @@ test bool tryDisClo_test_11() {
 	);
 	MaybeProof output = proof(disClo(input, name("x")));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ q^[] <a^x>p^x ]
@@ -146,7 +146,7 @@ test bool tryDisClo_test_12() {
 	);
 	MaybeProof output = proof(disClo(input, name("x")));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ q^[] <a^x>p^x ]
@@ -161,7 +161,7 @@ test bool tryDisClo_test_13() {
 	
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), disClo(seq2, name("x"))));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^y>p^y ]
@@ -174,7 +174,7 @@ test bool tryDisClo_test_14() {
 	);
 	MaybeProof output = proof(disClo(input, name("y")));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // seq:     [ <a^y>p^[x, y] ]
@@ -187,160 +187,7 @@ test bool tryDisClo_test_15() {
 	);
 	MaybeProof output = proof(disClo(input, name("y")));
 	
-	return tryDisClo(input, cloSeqs, -1) == output;
-}
-
-// from: [ ]
-// to:   [ p^[] ]
-test bool detectCycles_test_1() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [];
-	
-	return detectCycles(input, fpSeqs) == false;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ p^[] ]
-test bool detectCycles_test_2() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ q^[] ]
-test bool detectCycles_test_3() {
-	CloGSequent input = [term(atomP(prop("q")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == false;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ p^[] q^[] ]
-test bool detectCycles_test_4() {
-	CloGSequent input = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ q^[] ] ]
-// to:   [ p^[] q^[] r^[] ]
-test bool detectCycles_test_5() {
-	CloGSequent input = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false), term(atomP(prop("r")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] q^[] ] ]
-// to:   [ p^[] ]
-test bool detectCycles_test_6() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == false;
-}
-
-// from: [ [ p^[] q^[] ] ]
-// to:   [ q^[] p^[] ]
-test bool detectCycles_test_7() {
-	CloGSequent input = [term(atomP(prop("q")), [], false), term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ p^x ]
-test bool detectCycles_test_8() {
-	CloGSequent input = [term(atomP(prop("p")), [name("x")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^x ] ]
-// to:   [ p^[] ]
-test bool detectCycles_test_9() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [name("x")], false)] ];
-	
-	return detectCycles(input, fpSeqs) == false;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ p^x q^y ]
-test bool detectCycles_test_10() {
-	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(atomP(prop("q")), [name("y")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] ]
-// to:   [ p^[x y] ]
-test bool detectCycles_test_11() {
-	CloGSequent input = [term(atomP(prop("p")), [name("x"), name("y")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^y ] ]
-// to:   [ p^[x y] ]
-test bool detectCycles_test_12() {
-	CloGSequent input = [term(atomP(prop("p")), [name("x"), name("y")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [name("y")], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[x y] ] ]
-// to:   [ p^y ]
-test bool detectCycles_test_13() {
-	CloGSequent input = [term(atomP(prop("p")), [ name("y")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [name("y"), name("x")], false)] ];
-	
-	return detectCycles(input, fpSeqs) == false;
-}
-
-// from: [ [ p^[y x] ] ]
-// to:   [ p^[x y] ]
-test bool detectCycles_test_14() {
-	CloGSequent input = [term(atomP(prop("p")), [ name("x"), name("y")], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [name("y"), name("x")], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] [ q^[] ] ]
-// to:   [ p^[] ]
-test bool detectCycles_test_15() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] [ q^[] ] ]
-// to:   [ q^[] ]
-test bool detectCycles_test_16() {
-	CloGSequent input = [term(atomP(prop("q")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
-}
-
-// from: [ [ p^[] ] [ q^[] ] ]
-// to:   [ q^x r^[] ]
-test bool detectCycles_test_17() {
-	CloGSequent input = [term(atomP(prop("q")), [name("x")], false), term(atomP(prop("r")), [], false)];
-	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [], false)] ];
-	
-	return detectCycles(input, fpSeqs) == true;
+	return tryDisClo(input, cloSeqs) == output;
 }
 
 // from: [ p^[] ]
@@ -350,7 +197,7 @@ test bool proofSearchWeakExp_test_1() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(to, weak(), CloGLeaf()));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] ]
@@ -360,7 +207,7 @@ test bool proofSearchWeakExp_test_2() {
 	CloGSequent to = [term(atomP(prop("q")), [], false)];
 	MaybeProof output = noProof();
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[] ]
@@ -371,7 +218,7 @@ test bool proofSearchWeakExp_test_3() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] ]
@@ -381,7 +228,7 @@ test bool proofSearchWeakExp_test_4() {
 	CloGSequent to = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false)];
 	MaybeProof output = noProof();
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[] r^[] ]
@@ -393,7 +240,7 @@ test bool proofSearchWeakExp_test_5() {
 	CloGSequent to = [term(atomP(prop("q")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, weak(), CloGUnaryInf(to, weak(), CloGLeaf()))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[] r^[] ]
@@ -404,7 +251,7 @@ test bool proofSearchWeakExp_test_6() {
 	CloGSequent to = [term(atomP(prop("p")), [], false), term(atomP(prop("r")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[] r^[] ]
@@ -416,7 +263,7 @@ test bool proofSearchWeakExp_test_7() {
 	CloGSequent to = [term(atomP(prop("r")), [], false), term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x] ]
@@ -427,7 +274,7 @@ test bool proofSearchWeakExp_test_8() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] ]
@@ -437,7 +284,7 @@ test bool proofSearchWeakExp_test_9() {
 	CloGSequent to = [term(atomP(prop("p")), [name("x")], false)];
 	MaybeProof output = noProof();
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x y] ]
@@ -449,7 +296,7 @@ test bool proofSearchWeakExp_test_10() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, exp(), CloGUnaryInf(to, weak(), CloGLeaf()))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x y] ]
@@ -460,7 +307,7 @@ test bool proofSearchWeakExp_test_11() {
 	CloGSequent to = [term(atomP(prop("p")), [name("x")], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x y z] ]
@@ -472,7 +319,7 @@ test bool proofSearchWeakExp_test_12() {
 	CloGSequent to = [term(atomP(prop("p")), [name("y")], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, exp(), CloGUnaryInf(to, weak(), CloGLeaf()))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x y z] ]
@@ -483,7 +330,7 @@ test bool proofSearchWeakExp_test_13() {
 	CloGSequent to = [term(atomP(prop("p")), [name("x"), name("z")], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x y z] ]
@@ -495,7 +342,7 @@ test bool proofSearchWeakExp_test_14() {
 	CloGSequent to = [term(atomP(prop("p")), [name("z"), name("x")], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[x] q^[] ]
@@ -507,7 +354,7 @@ test bool proofSearchWeakExp_test_15() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, exp(), CloGUnaryInf(seq2, weak(), CloGUnaryInf(to, weak(), CloGLeaf()))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[x] ]
@@ -518,7 +365,7 @@ test bool proofSearchWeakExp_test_16() {
 	CloGSequent to = [term(atomP(prop("p")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(to, weak(), CloGLeaf())));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[x] ]
@@ -530,7 +377,7 @@ test bool proofSearchWeakExp_test_17() {
 	CloGSequent to = [term(atomP(prop("q")), [], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, exp(), CloGUnaryInf(to, weak(), CloGLeaf()))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
 
 // from: [ p^[] q^[x y z] r^[] ]
@@ -544,5 +391,5 @@ test bool proofSearchWeakExp_test_18() {
 	CloGSequent to = [term(atomP(prop("q")), [name("y")], false)];
 	MaybeProof output = proof(CloGUnaryInf(seq1, weak(), CloGUnaryInf(seq2, exp(), CloGUnaryInf(seq3, exp(), CloGUnaryInf(seq4, weak(), CloGUnaryInf(to, weak(), CloGLeaf()))))));
 	
-	return proofSearchWeakExp(from, to, -1) == output;
+	return proofSearchWeakExp(from, to) == output;
 }
