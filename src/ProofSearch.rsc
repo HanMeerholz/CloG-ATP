@@ -23,8 +23,8 @@ MaybeProof proofSearch(CloGSequent seq) {
 /*
  * Calls the main proof search algorithm without a maximum recursion depth.
  */
-MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs) {
-	return proofSearch(seq, cloSeqs, fpSeqs, -1);
+MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[GameLog] fpForms) {
+	return proofSearch(seq, cloSeqs, fpForms, -1);
 }
 
 /*
@@ -69,8 +69,7 @@ MaybeProof proofSearch(CloGSequent seq, int maxRecursionDepth) {
  * If all the rule applications return noProof(), no proof could be found and a noProof() is
  * returned.
  */
-MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {	
-	
+MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[GameLog] fpForms, int depth) {
 	//println("seq    = <seq>");
 	//println("cloSeqs = <cloSeqs>");
 	//println("fpAppls = <fpAppls>");
@@ -82,51 +81,49 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	//remove the duplicates
 	seq = dup(seq);
 	
-	
 	resProof = tryDisClo(seq, cloSeqs, depth);
 	if (resProof != noProof()) return resProof;
 	
-	if (detectCycles(seq, fpSeqs)) return noProof();	
+	//if (detectCycles(seq, fpSeqs)) return noProof();	
 	
-	
-	fpSeqs += [seq];
+	//fpSeqs += [seq];
 	
 	resProof = tryApplyAx1(seq, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyModm(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyModm(seq, cloSeqs, fpForms, depth);
+	if (resProof != noProof()) return resProof;	
+	
+	resProof = tryApplyOr(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyChoice(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyAnd(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyDChoice(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyChoice(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyTest(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyDChoice(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyDTest(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyConcat(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyClo(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyTest(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyOr(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyDTest(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyAnd(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyClo(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyIter(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != noProof()) return resProof;
-		
-	resProof = tryApplyDIter(seq, cloSeqs, fpSeqs, depth);
+	resProof = tryApplyDIter(seq, cloSeqs, fpForms, depth);
 	if (resProof != noProof()) return resProof;
 	
-	resProof = tryApplyConcat(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != noProof()) return resProof;
-		
+	resProof = tryApplyIter(seq, cloSeqs, fpForms, depth);
+	if (resProof != noProof()) return resProof;	
+	
 	return noProof();
 }
 
@@ -157,7 +154,7 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 			 && term(\mod(dIter(gamma), phi), list[CloGName] b, _) := fpSeq[fpIdx]
 			 && b + cn <= a) {
 			 	fpSeq[fpIdx] = term(\mod(dIter(gamma), phi), b + cn, false);
-			 	resProof = proofSearchWeakExp(seq, fpSeq, depth - 1);
+			 	resProof = proofSearchWeakExp(seq, fpSeq);
 			 	
 			 	return visit(resProof) {
 			 		case CloGUnaryInf(CloGSequent resSeq, weak(), CloGLeaf()) => disClo(resSeq, cn)
@@ -168,41 +165,41 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	return noProof();
 }
 
-/*
- * A function that returns whether cycles are detected between the current sequent and the list
- * of saved fixpoint sequents.
- *
- * Input:  a current sequent, and a list of fixpoint sequents
- * Output: true, if a cycle is detected, false, otherwise
- *
- * The algorithm loops through all the fixpoint sequents, and if for any of them, a cycle is
- * detected, true is returned. Otherwise, false is returned.
- * A cycle is detected for a fixpoint sequent, if this sequent can be reached from the current
- * sequent merely by applying weak and exp rules. This is the case, if each term in the fixpoint
- * sequent can be reduced from a term of the current sequent.
- */
-bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
-	for (CloGSequent fpSeq <- fpSeqs) {	
-	 	// seq is found if all its terms are found
-		bool foundSeq = true;
-		
-		for (int i <- [0 .. size(fpSeq)]) {
-			// term is found if any of the terms in seq correspond to the current term in fpSeq
-		    bool foundTerm = false;
-		    
-		    for (int j <- [0 .. size(seq)]) {		    
-		    	if (term(GameLog phi, list[CloGName] a, _) := fpSeq[i] && term(phi, list[CloGName] b, _) := seq[j] && toSet(a) <= toSet(b)) {
-		    		foundTerm = true;
-		    		break;
-		    	}
-		    }
-		    // if one of the terms isn't found, the whole sequent is not found
-		    if (!foundTerm) foundSeq = false;
-		}
-		if (foundSeq) return true;
-	}
-	return false;
-}
+///*
+// * A function that returns whether cycles are detected between the current sequent and the list
+// * of saved fixpoint sequents.
+// *
+// * Input:  a current sequent, and a list of fixpoint sequents
+// * Output: true, if a cycle is detected, false, otherwise
+// *
+// * The algorithm loops through all the fixpoint sequents, and if for any of them, a cycle is
+// * detected, true is returned. Otherwise, false is returned.
+// * A cycle is detected for a fixpoint sequent, if this sequent can be reached from the current
+// * sequent merely by applying weak and exp rules. This is the case, if each term in the fixpoint
+// * sequent can be reduced from a term of the current sequent.
+// */
+//bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
+//	for (CloGSequent fpSeq <- fpSeqs) {	
+//	 	// seq is found if all its terms are found
+//		bool foundSeq = true;
+//		
+//		for (int i <- [0 .. size(fpSeq)]) {
+//			// term is found if any of the terms in seq correspond to the current term in fpSeq
+//		    bool foundTerm = false;
+//		    
+//		    for (int j <- [0 .. size(seq)]) {		    
+//		    	if (term(GameLog phi, list[CloGName] a, _) := fpSeq[i] && term(phi, list[CloGName] b, _) := seq[j] && toSet(a) <= toSet(b)) {
+//		    		foundTerm = true;
+//		    		break;
+//		    	}
+//		    }
+//		    // if one of the terms isn't found, the whole sequent is not found
+//		    if (!foundTerm) foundSeq = false;
+//		}
+//		if (foundSeq) return true;
+//	}
+//	return false;
+//}
 
 /*
  * A function that searches for a proof from one sequent to another, using only the exp and weak
@@ -220,8 +217,8 @@ bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
  * with an empty sequent, when all terms have been removed by weakening, in which case noProof()
  * is returned.
  */
-MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, int depth) {
-	if (depth == 0) return noProof();
+MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo) {
+	//if (depth == 0) return noProof();
 
 	if (isEmpty(seqFrom))
 		return noProof();
@@ -238,11 +235,12 @@ MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, int depth)
 			termTo = seqTo[j];
 			if (termFrom.s == termTo.s && toSet(termFrom.label) > toSet(termTo.label)) {
 				for (CloGName n <- termFrom.label - termTo.label) {
-									
+					
+					println("applied exp");				
 					newSeq = seqFrom;
 					newSeq[i] = term(termFrom.s, termFrom.label - n, false);
 					
-					subProof = proofSearchWeakExp(newSeq, seqTo, depth - 1);
+					subProof = proofSearchWeakExp(newSeq, seqTo);
 					if (subProof != noProof()) {
 						seqFrom[i].active = true;
 						return proof(CloGUnaryInf(seqFrom, exp(), subProof.p));
@@ -253,7 +251,7 @@ MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo, int depth)
 		println("applied weak");
 		
 		newSeq = delete(seqFrom, i);
-		subProof = proofSearchWeakExp(newSeq, seqTo, depth-1);
+		subProof = proofSearchWeakExp(newSeq, seqTo);
 		if (subProof != noProof()) {
 			seqFrom[i].active = true;
 			return proof(CloGUnaryInf(seqFrom, weak(), subProof.p));
