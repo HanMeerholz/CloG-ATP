@@ -20,6 +20,13 @@ alias FpSeq = tuple[CloGSequent contextSeq, int fpFormulaIdx];
  */
 alias CloSeqs = map[CloGName name, FpSeq fpSeq];
 
+
+
+
+alias FpClosure = map[GameLog fpForm, CloGName name];
+
+public FpClosure fpClosure = ();
+
 /*
  * MaybeProof is either a CloGProof, or noProof(), which indicates no proof could be
  * found.
@@ -84,3 +91,4 @@ bool subTerm(Game g, Game h) {
 		return true;
 	return false;
 }
+

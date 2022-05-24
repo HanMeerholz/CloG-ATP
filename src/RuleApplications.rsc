@@ -56,7 +56,7 @@ MaybeSequent applyAx1(CloGSequent seq) {
  * 
  * If no such terms exist, noProof() is returned.
  */
-MaybeProof tryApplyAx1(CloGSequent seq, int depth) {
+MaybeProof tryApplyAx1(CloGSequent seq) {
 	for (int termIdx <- [0 .. size(seq)]) {
 		if (term(atomP(Prop p), _, _) := seq[termIdx]) {
 			for (int termIdx2 <- [0 .. size(seq)]) {
@@ -634,9 +634,10 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[GameLog] fpForms,
 MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs, list[GameLog] fpForms) {
 	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
 	
-		for (GameLog gl <- fpForms)
+		for (GameLog gl <- fpForms) {
 			if (seq[termIdx].s == gl)
 				return noSeq();
+		}
 				
 		for (CloGName x <- a)
 			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))

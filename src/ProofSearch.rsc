@@ -81,14 +81,14 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[GameLog] fpForms, 
 	//remove the duplicates
 	seq = dup(seq);
 	
-	resProof = tryDisClo(seq, cloSeqs, depth);
+	resProof = tryDisClo(seq, cloSeqs);
 	if (resProof != noProof()) return resProof;
 	
 	//if (detectCycles(seq, fpSeqs)) return noProof();	
 	
 	//fpSeqs += [seq];
 	
-	resProof = tryApplyAx1(seq, depth);
+	resProof = tryApplyAx1(seq);
 	if (resProof != noProof()) return resProof;
 	
 	resProof = tryApplyModm(seq, cloSeqs, fpForms, depth);
@@ -144,7 +144,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[GameLog] fpForms, 
  * If for none of the closure sequents, such a fixpoint formula exists, or it can be reached by
  * weak and exp rules applications, noProof() is returned.
  */
-MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs, int depth) {
+MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs) {
 	for (CloGName cn <- cloSeqs) {
 		fpSeq = cloSeqs[cn].contextSeq;
 		fpIdx = cloSeqs[cn].fpFormulaIdx;
@@ -164,42 +164,6 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs, int depth) {
 	}
 	return noProof();
 }
-
-///*
-// * A function that returns whether cycles are detected between the current sequent and the list
-// * of saved fixpoint sequents.
-// *
-// * Input:  a current sequent, and a list of fixpoint sequents
-// * Output: true, if a cycle is detected, false, otherwise
-// *
-// * The algorithm loops through all the fixpoint sequents, and if for any of them, a cycle is
-// * detected, true is returned. Otherwise, false is returned.
-// * A cycle is detected for a fixpoint sequent, if this sequent can be reached from the current
-// * sequent merely by applying weak and exp rules. This is the case, if each term in the fixpoint
-// * sequent can be reduced from a term of the current sequent.
-// */
-//bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
-//	for (CloGSequent fpSeq <- fpSeqs) {	
-//	 	// seq is found if all its terms are found
-//		bool foundSeq = true;
-//		
-//		for (int i <- [0 .. size(fpSeq)]) {
-//			// term is found if any of the terms in seq correspond to the current term in fpSeq
-//		    bool foundTerm = false;
-//		    
-//		    for (int j <- [0 .. size(seq)]) {		    
-//		    	if (term(GameLog phi, list[CloGName] a, _) := fpSeq[i] && term(phi, list[CloGName] b, _) := seq[j] && toSet(a) <= toSet(b)) {
-//		    		foundTerm = true;
-//		    		break;
-//		    	}
-//		    }
-//		    // if one of the terms isn't found, the whole sequent is not found
-//		    if (!foundTerm) foundSeq = false;
-//		}
-//		if (foundSeq) return true;
-//	}
-//	return false;
-//}
 
 /*
  * A function that searches for a proof from one sequent to another, using only the exp and weak
