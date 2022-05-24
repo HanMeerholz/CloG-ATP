@@ -9,6 +9,7 @@ import CST2AST_CloG;
 import LaTeXOutput;
 import ATP_Base;
 import ProofSearch;
+import Closure;
 
 import util::IDE;
 import ParseTree;
@@ -58,8 +59,11 @@ void input2latex(str \in,  str out){
 
 // Input .seq file name, do a default proof search on the sequent and display the result in LaTeX
 // (or display "fail!" if no proof could be found).
-void ProofSearch_Tool(str file){
+void proofSearch_Tool(str file){
 	CloGSequent seqAST = getCloGAST(file);
+	
+	fpClosure = generateFpClosure(seqAST);
+	
 	MaybeProof resProof = proofSearch(seqAST);
 	if (resProof != noProof())
 		LaTeXOutput(resProof.p, outputLoc(file));
@@ -69,8 +73,11 @@ void ProofSearch_Tool(str file){
 
 // Input .seq file name, do a default proof search on the sequent and display the result in LaTeX
 // (or display "fail!" if no proof could be found).
-void ProofSearch_Tool(str file, int depth){
+void proofSearch_Tool(str file, int depth) {
 	CloGSequent seqAST = getCloGAST(file);
+	
+	fpClosure = generateFpClosure(seqAST);
+	
 	MaybeProof resProof = proofSearch(seqAST, depth);
 	if (resProof != noProof())
 		LaTeXOutput(resProof.p, outputLoc(file));
@@ -83,16 +90,18 @@ void ProofSearch_Tool(str file, int depth){
 // sequents and integers corresponding to the relevant fixpoint formula within those sequents, a given
 // list of fixpoint sequents in a similar manner (but without the integer), and a maximum proof search depth.
 // Display the result in LaTeX (or display "fail!" if no proof could be found).
-void ProofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpSeqsFiles, int depth){
+void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, str fpFormsFile, int depth){
 	CloGSequent seqAST = getCloGAST(file);
+	
+	fpClosure = generateFpClosure(seqAST);
+	
 	CloSeqs cloSeqs = ();
 	for (int i <- [0 .. size(cloSeqFiles)])
 		cloSeqs += (nameS("x", i): <getCloGAST(cloSeqFiles[i][0]), cloSeqFiles[i][1]>);
 	
-	list[CloGSequent] fpSeqs = [];
-	for (str fpSeqFile <- fpSeqsFiles)
-		fpSeqs += getCloGAST(fpSeqFile);
-	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpSeqs, depth);
+	CloGSequent fpSeq = getCloGAST(fpFormsFile);
+	list[GameLog] fpForms = [fpTerm.s | fpTerm <- fpSeq];
+	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpForms, depth);
 	if (resProof != noProof())
 		LaTeXOutput(resProof.p, outputLoc(file));
 	else
