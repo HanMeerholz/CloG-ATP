@@ -1,4 +1,4 @@
-module CST2AST_CloG
+module CloG_Base::CST2AST_CloG
 /*
  * Module containing function to transform CloG input to an abstract syntax tree
  */
@@ -6,8 +6,8 @@ module CST2AST_CloG
 import ParseTree;
 import String;
 
-import CloGSyntax;
-import GLASTs;
+import CloG_Base::CloGSyntax;
+import CloG_Base::GLASTs;
 import List;
 
 CloGSequent cst2astCloG(start[SCloGSequent] ss){

@@ -1,4 +1,4 @@
-module CloGSyntax
+module CloG_Base::CloGSyntax
 /* 
  * Module defines the concrete syntax for the input of a CloG proof
  *

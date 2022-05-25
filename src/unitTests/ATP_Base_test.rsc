@@ -1,7 +1,7 @@
 module unitTests::ATP_Base_test
 
-import ATP_Base;
-import GLASTs;
+import ATP::ATP_Base;
+import CloG_Base::GLASTs;
 import Exception;
 
 // SubTerm

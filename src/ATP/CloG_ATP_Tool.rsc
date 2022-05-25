@@ -1,15 +1,15 @@
-module CloG_ATP_Tool
+module ATP::CloG_ATP_Tool
 /*
  * Main module for the automated theorem prover tool
  */
 
-import CloGSyntax;
-import GLASTs;
-import CST2AST_CloG;
-import LaTeXOutput;
-import ATP_Base;
-import ProofSearch;
-import Closure;
+import CloG_Base::CloGSyntax;
+import CloG_Base::GLASTs;
+import CloG_Base::CST2AST_CloG;
+import CloG_Base::LaTeXOutput;
+import ATP::ATP_Base;
+import ATP::ProofSearch;
+import ATP::Closure;
 
 import util::IDE;
 import ParseTree;
@@ -20,8 +20,6 @@ void IDE() {
 	start[SCloGSequent] clogSeq(str src, loc l) {
 		return parse(#start[SCloGSequent], src, l);
 	}
-	
-	
 
 	registerLanguage("CloGSeq", "seq", clogSeq);
 }

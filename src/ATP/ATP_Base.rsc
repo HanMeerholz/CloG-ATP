@@ -1,10 +1,10 @@
-module ATP_Base
+module ATP::ATP_Base
 /*
  * Module defining data types relevant for the Automated Theorem Prover, and
  * some helper functions.
  */
 
-import GLASTs;
+import CloG_Base::GLASTs;
 import Exception;
 
 /* 

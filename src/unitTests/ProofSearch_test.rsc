@@ -1,8 +1,8 @@
 module unitTests::ProofSearch_test
 
-import ProofSearch;
-import GLASTs;
-import ATP_Base;
+import CloG_Base::GLASTs;
+import ATP::ATP_Base;
+import ATP::ProofSearch;
 import IO;
 
 

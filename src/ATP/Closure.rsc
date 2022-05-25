@@ -1,7 +1,7 @@
-module Closure
+module ATP::Closure
 
-import ATP_Base;
-import GLASTs;
+import CloG_Base::GLASTs;
+import ATP::ATP_Base;
 import Map;
 
 /*

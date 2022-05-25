@@ -1,4 +1,4 @@
-module ProofSearch
+module ATP::ProofSearch
 /*
  * Module defining the basic proof search algorithm, and some helper functions:
  * A basic depth-first search, applying a rule (possibly on a specific formula)
@@ -7,9 +7,9 @@ module ProofSearch
 
 import List;
 import Map;
-import ATP_Base;
-import GLASTs;
-import RuleApplications;
+import CloG_Base::GLASTs;
+import ATP::ATP_Base;
+import ATP::RuleApplications;
 import IO;
 
 /*

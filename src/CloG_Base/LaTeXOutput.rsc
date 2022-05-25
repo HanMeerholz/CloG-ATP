@@ -1,9 +1,9 @@
-module LaTeXOutput
+module CloG_Base::LaTeXOutput
 /*
  * Module defining the transformation from abstract proof trees to LaTeX proof trees
  */
 
-import GLASTs;
+import CloG_Base::GLASTs;
 
 import IO;
 import List;

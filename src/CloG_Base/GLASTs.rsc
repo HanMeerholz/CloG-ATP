@@ -1,4 +1,4 @@
-module GLASTs
+module CloG_Base::GLASTs
 /*
  * Module defining all Abstract Syntax Types for the Game logic proof transformations
  */

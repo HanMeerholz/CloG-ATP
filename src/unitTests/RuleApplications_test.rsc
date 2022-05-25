@@ -1,8 +1,8 @@
 module unitTests::RuleApplications_test
 
-import RuleApplications;
-import GLASTs;
-import ATP_Base;
+import CloG_Base::GLASTs;
+import ATP::RuleApplications;
+import ATP::ATP_Base;
 import IO;
 
 // Apply Ax1
