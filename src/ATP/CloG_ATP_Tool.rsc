@@ -88,7 +88,7 @@ void proofSearch_Tool(str file, int depth) {
 // sequents and integers corresponding to the relevant fixpoint formula within those sequents, a given
 // list of fixpoint sequents in a similar manner (but without the integer), and a maximum proof search depth.
 // Display the result in LaTeX (or display "fail!" if no proof could be found).
-void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, str fpFormsFile, int depth){
+void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpSeqsFiles, int depth){
 	CloGSequent seqAST = getCloGAST(file);
 	
 	fpClosure = generateFpClosure(seqAST);
@@ -97,9 +97,11 @@ void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, str fpFormsFi
 	for (int i <- [0 .. size(cloSeqFiles)])
 		cloSeqs += (nameS("x", i): <getCloGAST(cloSeqFiles[i][0]), cloSeqFiles[i][1]>);
 	
-	CloGSequent fpSeq = getCloGAST(fpFormsFile);
-	list[GameLog] fpForms = [fpTerm.s | fpTerm <- fpSeq];
-	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpForms, depth);
+	list[CloGSequent] fpSeqs = [];
+	for (str fpSeqFile <- fpSeqsFiles)
+		fpSeqs += getCloGAST(fpSeqFile);
+		
+	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof())
 		LaTeXOutput(resProof.p, outputLoc(file));
 	else

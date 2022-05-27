@@ -1,4 +1,8 @@
 module unitTests::ATP_Base_test
+/*
+ * Module to unit test the functions in the ATP::ATP_Base module, namely the
+ * subTerm() and fpLessThanOrEqualTo() functions.
+ */
 
 import ATP::ATP_Base;
 import CloG_Base::GLASTs;
