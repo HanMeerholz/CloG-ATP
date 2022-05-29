@@ -651,8 +651,6 @@ tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs clo
 	
 		for (CloGName x <- a) {
 			GameLog cloForm = cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s;
-			if (cloForm == seq[termIdx].s)
-				return <noSeq(), name("")>;
 			if (!fpLessThanOrEqualTo(cloForm, \mod(dIter(gamma), phi)))
 				return <noSeq(), name("")>;
 		}
