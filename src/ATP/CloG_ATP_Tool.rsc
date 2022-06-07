@@ -9,6 +9,7 @@ import CloG_Base::CST2AST_CloG;
 import CloG_Base::LaTeXOutput;
 import ATP::ATP_Base;
 import ATP::ProofSearch;
+import ATP::PostProcess;
 import ATP::Closure;
 
 import util::IDE;
@@ -77,9 +78,10 @@ void proofSearch_Tool(str file, int depth) {
 	fpClosure = generateFpClosure(seqAST);
 	
 	MaybeProof resProof = proofSearch(seqAST, depth);
-	if (resProof != noProof())
-		LaTeXOutput(resProof.p, outputLoc(file));
-	else
+	if (resProof != noProof()) {
+		CloGProof validProof = replaceUnusedClos(resProof.p);
+		LaTeXOutput(validProof, outputLoc(file));
+	} else
 		println("fail!\n");
 }
 
