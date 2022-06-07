@@ -20,9 +20,6 @@ alias FpSeq = tuple[CloGSequent contextSeq, int fpFormulaIdx];
  */
 alias CloSeqs = map[CloGName name, FpSeq fpSeq];
 
-
-
-
 alias FpClosure = map[GameLog fpForm, CloGName name];
 
 public FpClosure fpClosure = ();
@@ -33,7 +30,8 @@ public FpClosure fpClosure = ();
  */
 data MaybeProof
 	= proof(CloGProof p)
-	| noProof();
+	| noProof()
+	| cantApply();
 	
 /*
  * MaybeSequent is either a CloGSequent, or noSeq(), which indicates no sequent could

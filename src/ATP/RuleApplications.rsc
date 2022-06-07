@@ -82,7 +82,7 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
 		}
 	}
 	
-	return noProof();
+	return cantApply();
 }
 
 
@@ -150,7 +150,7 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 					
 					if (resSeq != noSeq()) {
 						subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-						if (subProof != noProof()) {
+						if (subProof != noProof() && subProof != cantApply()) {
 							weakenTo[0].active = true;
 							weakenTo[1].active = true;
 							
@@ -166,7 +166,7 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 		}
 	}
 	
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -210,14 +210,18 @@ MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 		if (resSeqs != noSeqs()) {
 			MaybeProof subProofL = proofSearch(resSeqs.left, cloSeqs, fpSeqs, depth - 1);
 			MaybeProof subProofR = proofSearch(resSeqs.right, cloSeqs, fpSeqs, depth - 1);
-			if (subProofL != noProof() && subProofR != noProof()) {
-				seq[termIdx].active = true;
-				return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
-			}
+			
+			if (subProofL == noProof() || subProofR == noProof())
+				return noProof();
+			if (subProofL == cantApply() || subProofR == cantApply())
+				return cantApply();
+			
+			seq[termIdx].active = true;
+			return proof(CloGBinaryInf(seq, subProofL.p, subProofR.p));
 		}
 	}
 	
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -270,14 +274,15 @@ MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs
 			//}	
 			
 			subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, orR(), subProof.p));		
 			}
+			return subProof;
 		}
 	}
 	
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -316,14 +321,15 @@ MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fp
 		MaybeSequent resSeq = applyChoice(seq, termIdx);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, choiceR(), subProof.p));
 			}
+			return subProof;
 		}
 	}
 
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -362,14 +368,15 @@ MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] f
 		MaybeSequent resSeq = applyDChoice(seq, termIdx);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dChoiceR(), subProof.p));
 			}
+			return subProof;
 		}
 	}
 		
-	return noProof();
+	return cantApply();
 }
 
 
@@ -409,14 +416,15 @@ MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fp
 		MaybeSequent resSeq = applyConcat(seq, termIdx);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, concatR(), subProof.p));
 			}
+			return subProof;
 		}
 	}
 		
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -455,14 +463,15 @@ MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 		MaybeSequent resSeq = applyTest(seq, termIdx);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, testR(), subProof.p));
 			}
+			return subProof;
 		}
 	}
 		
-	return noProof();
+	return cantApply();
 }
 
 
@@ -502,14 +511,15 @@ MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 		MaybeSequent resSeq = applyDTest(seq, termIdx);
 		if (resSeq != noSeq()) {
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dTestR(), subProof.p));
 			}
+			return subProof;
 		}
 	}
 		
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -560,13 +570,14 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 		if (resSeq != noSeq()) {
 			fpSeqs += [seq];
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, iterR(), subProof.p));
 			}
+			return subProof;
 		}
 	}	
-	return noProof();	
+	return cantApply();	
 }
 
 /* 
@@ -616,13 +627,14 @@ MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 		if (resSeq != noSeq()) {
 			fpSeqs += [seq];
 			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-			if (subProof != noProof()) {
+			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
 				return proof(CloGUnaryInf(seq, dIterR(), subProof.p));
 			}
+			return subProof;
 		}
 	}	
-	return noProof();
+	return cantApply();
 }
 
 /* 
@@ -654,7 +666,6 @@ tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs clo
 			if (!fpLessThanOrEqualTo(cloForm, \mod(dIter(gamma), phi)))
 				return <noSeq(), name("")>;
 		}
-
 		
 		CloGName newName = nameS("x", size(cloSeqs));
 	
@@ -683,42 +694,18 @@ tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs clo
  */
 MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
-		if (<noSeq(), _> := applyClo(seq, termIdx, cloSeqs) ) continue;
-		for (int i <- [1 .. size(seq) + 1]) {
-			list[list[int]] combs = combinationsIncluding(size(seq), i, termIdx);
-			for (list[int] comb <- combs) {
-				CloGSequent weakenTo = [];
-				for (int idx <- comb) {
-					weakenTo += seq[idx];
-				}
-				
-				for (int subSeqTermIdx <- [0 .. size(weakenTo)]) {
-				
-					tuple[MaybeSequent resSeq, CloGName newName] res = applyClo(weakenTo, subSeqTermIdx, cloSeqs);
-					if (res.resSeq != noSeq()) {
-					
-						cloSeqs += (res.newName: <weakenTo, subSeqTermIdx>);
-						fpSeqs += [weakenTo];
-						
-						MaybeProof subProof = proofSearch(res.resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-						if (subProof != noProof()) {
-							resProof = proofSearchWeakExp(seq, weakenTo);
-						
-							weakenTo[subSeqTermIdx].active = true;
-							
-							resProof2 = visit(resProof) {
-						 		case CloGUnaryInf(_, weak(), CloGLeaf()) => CloGUnaryInf(weakenTo, clo(res.newName), subProof.p)
-						 	};
-						 	
-						 	return resProof2;
-						}
-						cloSeqs = delete(cloSeqs, res.newName);
-						fpSeqs -= [weakenTo];
-					}
-				}
+	
+		tuple[MaybeSequent resSeq, CloGName newName] res = applyClo(seq, termIdx, cloSeqs);
+		if (res.resSeq != noSeq()) {
+			cloSeqs += (res.newName: <seq, termIdx>);
+			fpSeqs += [seq];
+			MaybeProof subProof = proofSearch(res.resSeq.seq, cloSeqs, fpSeqs, depth - 1);
+			if (subProof != noProof() && subProof != cantApply()) {
+				seq[termIdx].active = true;
+				return proof(CloGUnaryInf(seq, clo(res.newName), subProof.p));
 			}
+			return subProof;
 		}
 	}	
-		
-	return noProof();	
+	return cantApply();
 }
