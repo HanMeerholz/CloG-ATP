@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(p)^{\varepsilon}, (\neg p)^{\varepsilon}, \textcolor{red}{(\neg q)^{\varepsilon}}$}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(q)^{\varepsilon}}, \textcolor{red}{(\neg q)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(q)^{\varepsilon}, \textcolor{red}{(\neg p)^{\varepsilon}}, (\neg q)^{\varepsilon}$}
+\RightLabel{$\wedge$}
+\BinaryInfC{$\textcolor{red}{(p\wedge q)^{\varepsilon}}, (\neg p)^{\varepsilon}, (\neg q)^{\varepsilon}$}
+\RightLabel{$?$}
+\UnaryInfC{$\textcolor{red}{(\langle p?\rangle q)^{\varepsilon}}, (\neg p)^{\varepsilon}, (\neg q)^{\varepsilon}$}
+\end{prooftree}
+
+\end{document}

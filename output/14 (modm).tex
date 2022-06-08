@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle a\rangle p)^{\varepsilon}}, \textcolor{red}{(\langle {a}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle a\rangle p\vee \langle {a}^d\rangle \neg p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}

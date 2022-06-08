@@ -70,6 +70,10 @@ void proofSearch_Tool(str file){
 		println("fail!\n");
 }
 
+void proofSearch_Tool(str file) {
+	proofSearch_Tool(file, -1);
+}
+
 // Input .seq file name, do a default proof search on the sequent, make it a valid proof by replacing
 // the unused closure rule applications, and display the result in LaTeX
 // (or display "fail!" if no proof could be found).
@@ -86,6 +90,9 @@ void proofSearch_Tool(str file, int depth) {
 		println("fail!\n");
 }
 
+void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpSeqsFiles) {
+	proofSearch_Tool(file, cloSeqFiles, fpSeqsFiles, -1);
+}
 
 // Input .seq file name, do a proof search on the sequent with a given list of names to files with closure
 // sequents and integers corresponding to the relevant fixpoint formula within those sequents, a given
@@ -103,7 +110,7 @@ void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpS
 	
 	list[CloGSequent] fpSeqs = [];
 	for (str fpSeqFile <- fpSeqsFiles)
-		fpSeqs += getCloGAST(fpSeqFile);
+		fpSeqs += [getCloGAST(fpSeqFile)];
 		
 	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) {

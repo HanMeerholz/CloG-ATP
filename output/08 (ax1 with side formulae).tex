@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(\neg q)^{\varepsilon}}, \textcolor{red}{(q)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(\neg q)^{\varepsilon}, \textcolor{red}{(r)^{\varepsilon}}, (q)^{\varepsilon}$}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, (\neg q)^{\varepsilon}, (r)^{\varepsilon}, (q)^{\varepsilon}$}
+\end{prooftree}
+
+\end{document}

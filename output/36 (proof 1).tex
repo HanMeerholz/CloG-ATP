@@ -1,0 +1,50 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, \textcolor{red}{(p)^{\varepsilon}}$}
+\RightLabel{exp}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(p)^{x_{0}} }$}
+\RightLabel{weak}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle ({a}^d\sqcup {b}^d)\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{0}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle ({a}^d\sqcup {b}^d)\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{0}} $}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{0}} $}
+\AxiomC{$[(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} ]^{x_{0}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, \textcolor{red}{(\langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{weak}
+\UnaryInfC{$(\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} , \textcolor{red}{(\langle a\rangle \langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(\langle {a}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} , (\langle a\rangle \langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} , (\langle a\rangle \langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, (\langle {a}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p\vee \langle a\rangle \langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{$*$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, (\langle {a}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, (\langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{$\vee$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {a}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p\vee \langle {b}^d\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{$\sqcup$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle ({a}^d\sqcup {b}^d)\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle ({a}^d\sqcup {b}^d)\rangle \langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^{*}\rangle \langle b\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} $}
+\RightLabel{$;$}
+\UnaryInfC{$(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle ({a}^{*};b)\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{$\wedge$}
+\BinaryInfC{$(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(p\wedge \langle ({a}^{*};b)\rangle \langle {({a}^{*};b)}^{\times}\rangle p)^{x_{0}} }$}
+\RightLabel{clo$_{x_{0}}$}
+\UnaryInfC{$(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle {({a}^{*};b)}^{\times}\rangle p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle {({a}^d\sqcup {b}^d)}^{*}\rangle \neg p\vee \langle {({a}^{*};b)}^{\times}\rangle p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}

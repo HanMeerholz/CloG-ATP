@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{exp}
+\UnaryInfC{$(p)^{\varepsilon}, \textcolor{red}{(\neg p)^{x_{2}} }$}
+\RightLabel{exp}
+\UnaryInfC{$(p)^{\varepsilon}, \textcolor{red}{(\neg p)^{x_{1}, x_{2}} }$}
+\RightLabel{exp}
+\UnaryInfC{$\textcolor{red}{(p)^{x_{1}} }, (\neg p)^{x_{1}, x_{2}} $}
+\RightLabel{exp}
+\UnaryInfC{$\textcolor{red}{(p)^{x_{0}, x_{1}} }, (\neg p)^{x_{1}, x_{2}} $}
+\end{prooftree}
+
+\end{document}

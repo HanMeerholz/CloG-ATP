@@ -1,0 +1,34 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle a\rangle p)^{\varepsilon}}, \textcolor{red}{(\langle {a}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(\langle a\rangle p)^{\varepsilon}, (\langle {a}^d\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle {b}^d\rangle \neg p)^{\varepsilon}}$}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle b\rangle p)^{\varepsilon}}, \textcolor{red}{(\langle {b}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(\langle b\rangle p)^{\varepsilon}, \textcolor{red}{(\langle {a}^d\rangle \neg p)^{\varepsilon}}, (\langle {b}^d\rangle \neg p)^{\varepsilon}$}
+\RightLabel{$\wedge$}
+\BinaryInfC{$\textcolor{red}{(\langle a\rangle p\wedge \langle b\rangle p)^{\varepsilon}}, (\langle {a}^d\rangle \neg p)^{\varepsilon}, (\langle {b}^d\rangle \neg p)^{\varepsilon}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$(\langle a\rangle p\wedge \langle b\rangle p)^{\varepsilon}, \textcolor{red}{(\langle {a}^d\rangle \neg p\vee \langle {b}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{$\sqcap$}
+\UnaryInfC{$\textcolor{red}{(\langle (a\sqcap b)\rangle p)^{\varepsilon}}, (\langle {a}^d\rangle \neg p\vee \langle {b}^d\rangle \neg p)^{\varepsilon}$}
+\RightLabel{$\sqcup$}
+\UnaryInfC{$(\langle (a\sqcap b)\rangle p)^{\varepsilon}, \textcolor{red}{(\langle ({a}^d\sqcup {b}^d)\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle (a\sqcap b)\rangle p\vee \langle ({a}^d\sqcup {b}^d)\rangle \neg p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}
