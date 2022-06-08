@@ -147,8 +147,10 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
  * A cycle is detected if the current sequent is identical to any of the sequents in fpSeqs.
  */
 bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
+	
+
 	for (CloGSequent fpSeq <- fpSeqs)
-		if (toSet(seq) == toSet(fpSeq))
+		if (toSet([<seqTerm.s, toSet(seqTerm.label)> | seqTerm <- seq]) == toSet([<fpSeqTerm.s, toSet(fpSeqTerm.label)> | fpSeqTerm <- fpSeq]))
 			return true;
 			
 	return false;
