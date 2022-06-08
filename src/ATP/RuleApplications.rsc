@@ -13,7 +13,7 @@ import List;
 import IO;
 
 /* 
- * A function applying the ax1 axiom to a term
+ * A function applying the "ax1" axiom to a term
  * 
  * Input:  the sequent
  * Output: the sequent resulting from applying the ax1 axiom
@@ -41,7 +41,7 @@ MaybeSequent applyAx1(CloGSequent seq) {
 }
 
 /*
- * A function applying the ax1 rule after some potential weakening and
+ * A function applying the "ax1" axiom after some potential weakening and
  * expanding of the terms in the sequent.
  * 
  * Input:  the sequent to which the rule is applied
@@ -51,7 +51,7 @@ MaybeSequent applyAx1(CloGSequent seq) {
  *
  * If there are two terms "p^a", and "~p^a", the weak rule is applied
  * to the remaining terms, and the exp rule is used to obtain "p^[]" and
- * "~p^[]". At this point, the ax1 rule can be applied, and the complete
+ * "~p^[]". At this point, the "ax1" axiom can be applied, and the complete
  * proof is returned.
  * 
  * If no such terms exist, noProof() is returned.
@@ -87,7 +87,7 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
 
 
  
-/* A function applying the modm rule to a term
+/* A function applying the "modm" rule to a term
  * 
  * Input:  the sequent to apply the modm rule to
  * Output: the sequent resulting from applying the modm rule
@@ -95,7 +95,8 @@ MaybeProof tryApplyAx1(CloGSequent seq) {
  * For the rule to be applied, there must be two terms in the sequent, of forms "<g>phi^a" and
  * "<g^d>psi^b"
  * 
- * If these conditions are met, a sequent containing "phi^a" and "psi^b" is returned.
+ * If these conditions are met, a sequent containing "phi^a" and "psi^b" is returned. Otherwise,
+ * noSeq() is returned.
  */
 MaybeSequent applyModm(CloGSequent seq) {
 
@@ -125,16 +126,17 @@ MaybeSequent applyModm(CloGSequent seq) {
  */
 
 /*
- * A function applying the modm rule to a sequent, after some potential 
+ * A function applying the "modm" rule to a sequent, after some potential 
  * weakening of the terms in the given sequent. The main proofSearch()
- * algorithm is called on the sequent resulting from applying this modm rule.
- *
+ * algorithm is called on the sequent resulting from applying this "modm" rule.
+ * 
  * For the rule to be applied, there must be 2 terms in the sequent of the
  * form "<g>phi^[a]", and "~<g^d>psi^[b]". The remaining terms are removed by
  * weakening rules, and a proof search is done on the resulting sequent.
- * 
- * If no proof could be found in this proof search, or there are no 2 terms
- * of the appropriate form, noSeq() is returned.
+ *
+ * The rule application is tried for any 2 terms of the form. If none of these 
+ * return a proof, or there are no 2 terms of the appropriate form, cantApply()
+ * is returned.
  */
 MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -170,7 +172,7 @@ MaybeProof tryApplyModm(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 }
 
 /* 
- * A function applying the and rule to a term
+ * A function applying the "and" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the and rule to
  * Output: the sequent resulting from applying the and rule
@@ -199,10 +201,13 @@ MaybeSequents applyAnd(CloGSequent seq, int termIdx) {
  * A function applying the "and" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequents.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the and
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "and"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
- * If a subproof is found, A CloGBinaryInf with the resulting subproofs, is returned.
- * Otherwise, noProof() is returned.
+ * If either of these proof searches returns a noProof() or cantApply(), that return value
+ * is propagated. If two subproofs are found, A CloGBinaryInf with the resulting subproofs,
+ * is returned.
+ * 
+ * If the "and" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {		
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -225,7 +230,7 @@ MaybeProof tryApplyAnd(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 }
 
 /* 
- * A function applying the or rule to a term
+ * A function applying the "or" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the or rule to
  * Output: the sequent resulting from applying the or rule
@@ -248,31 +253,17 @@ MaybeSequent applyOr(CloGSequent seq, int termIdx) {
  * A function applying the "or" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  * 
- * For any of the terms in the sequent, the algorithm checks tries to apply the or
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "or"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
  * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied orR()
- * rule is returned. Otherwise, noProof() is returned.
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "or" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {	
 	for (int termIdx <- [0 .. size(seq)]) {
 		MaybeSequent resSeq = applyOr(seq, termIdx);
-		if (resSeq != noSeq()) {
-			//resSeqWeak1 = resSeq.seq - resSeq.seq[termIdx];
-			//MaybeProof subProof = proofSearch(resSeqWeak1, cloSeqs, fpSeqs, depth - 1);
-			//if (subProof != noProof()) {
-			//	seq[termIdx].active = true;
-			//	resSeq.seq[termIdx].active = true;
-			//	return proof(CloGUnaryInf(seq, orR(), CloGUnaryInf(resSeq.seq, weak(), subProof.p)));
-			//}
-			//
-			//resSeqWeak2 = resSeq.seq - resSeq.seq[termIdx + 1];
-			//subProof = proofSearch(resSeqWeak2, cloSeqs, fpSeqs, depth - 1);
-			//if (subProof != noProof()) {
-			//	seq[termIdx].active = true;
-			//	resSeq.seq[termIdx + 1].active = true;
-			//	return proof(CloGUnaryInf(seq, orR(), CloGUnaryInf(resSeq.seq, weak(), subProof.p)));
-			//}	
-			
+		if (resSeq != noSeq()) {			
 			subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
 			if (subProof != noProof() && subProof != cantApply()) {
 				seq[termIdx].active = true;
@@ -286,7 +277,7 @@ MaybeProof tryApplyOr(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs
 }
 
 /* 
- * A function applying the or rule to a term
+ * A function applying the "choice" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the choice rule to
  * Output: the sequent resulting from applying the choice rule
@@ -308,13 +299,15 @@ MaybeSequent applyChoice(CloGSequent seq, int termIdx) {
 }
 
 /* 
- * A function applying the choice rule to a sequent and calling the main
+ * A function applying the "choice" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the choice
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "choice"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
- * choiceR() rule is returned. Otherwise, noProof() is returned.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied choiceR()
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "choice" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -333,7 +326,7 @@ MaybeProof tryApplyChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fp
 }
 
 /* 
- * A function applying the dChoice rule to a term
+ * A function applying the "dChoice" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the dChoice rule to
  * Output: the sequent resulting from applying the dChoice rule
@@ -355,13 +348,15 @@ MaybeSequent applyDChoice(CloGSequent seq, int termIdx) {
 }
 
 /* 
- * A function applying the dChoice rule to a sequent and calling the main
+ * A function applying the "dChoice" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the dChoice
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "dChoice"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
- * dChoiceR() rule is returned. Otherwise, noProof() is returned.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied dChoiceR()
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "dChoice" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -381,7 +376,7 @@ MaybeProof tryApplyDChoice(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] f
 
 
 /* 
- * A function applying the concat rule to a term
+ * A function applying the "concat" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the concat rule to
  * Output: the sequent resulting from applying the concat rule
@@ -403,13 +398,15 @@ MaybeSequent applyConcat(CloGSequent seq, int termIdx) {
 }
 
 /* 
- * A function applying the concat rule to a sequent and calling the main
+ * A function applying the "concat" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  * 
- * For any of the terms in the sequent, the algorithm checks tries to apply the concat
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "concat"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
- * concatR() rule is returned. Otherwise, noProof() is returned.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied concatR()
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "concat" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -428,7 +425,7 @@ MaybeProof tryApplyConcat(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fp
 }
 
 /* 
- * A function applying the test rule to a term
+ * A function applying the "test" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the test rule to
  * Output: the sequent resulting from applying the test rule
@@ -449,13 +446,15 @@ MaybeSequent applyTest(CloGSequent seq, int termIdx) {
 }
 
 /* 
- * A function applying the test rule to a sequent and calling the main
+ * A function applying the "test" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the test
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "test"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
- * testR() rule is returned. Otherwise, noProof() is returned.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied testR()
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "test" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -476,7 +475,7 @@ MaybeProof tryApplyTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 
 
 /* 
- * A function applying the dTest rule to a term
+ * A function applying the "dTest" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the dTest rule to
  * Output: the sequent resulting from applying the dTest rule
@@ -497,13 +496,15 @@ MaybeSequent applyDTest(CloGSequent seq, int termIdx) {
 }
 
 /* 
- * A function applying the test rule to a sequent and calling the main
+ * A function applying the "dTest" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the dTest
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "dTest"
  * rule. For all successful applications, a proof search is done on the resulting sequent,
- * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied
- * dTestR() rule is returned. Otherwise, noProof() is returned.
+ * If a subproof is found, A CloGUnaryInf with the resulting subproof, and the applied dTestR()
+ * rule is returned. Otherwise, the subProof itself is returned, which can be noProof()
+ * or cantApply().
+ * If the "dTest" rule could not be applied to any term in the sequent, cantApply() is returned
  */
 MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -523,7 +524,7 @@ MaybeProof tryApplyDTest(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 }
 
 /* 
- * A function applying the iter rule to a term
+ * A function applying the "iter" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the iter rule to,
  *         and the list of closure sequents
@@ -553,14 +554,15 @@ MaybeSequent applyIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 }
 
 /* 
- * A function applying the iter rule to a sequent and calling the main
+ * A function applying the "iter" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the iter
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "iter"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
  * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
  * and a CloGUnaryInf with the resulting subproof, and the applied iterR() rule is returned.
- * Otherwise, noProof() is returned.
+ * Otherwise, the subProof itself is returned, which can be noProof() or cantApply().
+ * If the "iter" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -581,7 +583,7 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 }
 
 /* 
- * A function applying the dIter rule to a term
+ * A function applying the "dIter" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the dIter rule to,
  *         and the list of closure sequents
@@ -611,14 +613,15 @@ MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
 }
 
 /* 
- * A function applying the dIter rule to a sequent and calling the main
+ * A function applying the "dIter" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * For any of the terms in the sequent, the algorithm checks tries to apply the dIter
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "dIter"
  * rule. For all successful applications, a proof search is done on the resulting sequent.
  * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
  * and a CloGUnaryInf with the resulting subproof, and the applied dIterR() rule is returned.
- * Otherwise, noProof() is returned.
+ * Otherwise, the subProof itself is returned, which can be noProof() or cantApply().
+ * If the "dIter" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {
@@ -638,7 +641,7 @@ MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpS
 }
 
 /* 
- * A function applying the clo rule to a term
+ * A function applying the "clo" rule to a term
  * 
  * Input:  the sequent and the index of the term therein to apply the clo rule to,
  *         and the list of closure sequents
@@ -677,20 +680,19 @@ tuple[MaybeSequent, CloGName] applyClo(CloGSequent seq, int termIdx, CloSeqs clo
 }
 
 /* 
- * A function applying the clo rule to a sequent and calling the main
+ * A function applying the "clo" rule to a sequent and calling the main
  * proof search algorithm on the resulting sequent.
  *
- * This algorithm tries to apply the closure rule to each of the terms in the sequent,
- * but for each of these terms, first weakening is applied as much as possible to the sequent,
- * in order to minimize the number of side formulae.
- * If a subproof is found, the current (sub)sequent is added to the list of fixpoint sequents,
+ * For any of the terms in the sequent, the algorithm checks tries to apply the "clo"
+ * rule. For all successful applications, a proof search is done on the resulting sequent.
+ * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
  * and the new name associated with the closure rule application is added to the closure
  * sequents as the key to the associated context sequence and the index of the term in the
  * sequent that contains the relevant fixpoint formula.
  * 
- * A CloGUnaryInf with the resulting subproof and the applied clo() rule (with the new name),
- * and the weakening required to get to the subsequent is returned. Otherwise, noProof() is
- * returned.
+ * A CloGUnaryInf with the resulting subproof, and the applied clo() rule (with the new name)
+ * is returned. Otherwise, the subProof itself is returned, which can be noProof() or cantApply().
+ * If the "clo" rule could not be applied to any term in the sequent, cantApply() is returned.
  */
 MaybeProof tryApplyClo(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	for (int termIdx <- [0 .. size(seq)]) {

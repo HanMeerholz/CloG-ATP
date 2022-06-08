@@ -47,27 +47,37 @@ MaybeProof proofSearch(CloGSequent seq, int maxRecursionDepth) {
  *
  * When the depth reaches 0, we do not recurse any further, and noProof() is returned.
  *
+ * Since terms in the sequent are saved in a list, rather than the theoretical set, we then
+ * remove the duplicates from this list.
+ * 
  * First, we try discharging a closure sequent if possible.
  *
  * If this is not possible, we try to detect cycles. If we find that by applying weakening
  * and expanding rules, we can reach one of the earlier fpSeqs, that means there is a cycle, and
- * we return noProof().
+ * we return cantApply().
  * We do this after trying to discharge closure sequents, because if we can discharge a closure
  * sequent, that also means that there is a cycle, only this cycle is desired.
  *
- * After this, we try applying the ax1 and modm rules, which implicitly also try to apply
- * weakening and expanding rules to reach just 2 terms upon which the rule can be applied.
+ * After this, we try applying the ax1 axiom which implicitly also tries to apply
+ * weakening and expanding rules to reach just 2 terms upon which it can be applied.
  *
  * If no proof can be found by applying those rules, we try applying the remaining rules, in the
- * order and, or, choice, dChoice, concat, test, dTest, clo, iter, dIter.
+ * order clo, choice, dChoice, concat, test, dTest, and, or, iter, dIter, and modm.
+ *
+ * We start with the clo rule application, because we want to apply this rule as early as
+ * possible in order to find a desired cycle more easily. After the clo rule, we saturate the
+ * sequent as much as possible, until no more rules can be applied or a cycle is detected.
+ *
+ * Only then, the last rule, modm is applied, which is not invertible like the other rules. 
  *
  * Each rule application returns a MaybePoof, since they recursively call the proofSearch()
  * algorithm again (except for the tryDisClo() and tryApplyAx1() rules, which call the
  * proofSearchWeakExp() algorithm instead) on the resulting sequent of the application of the
  * corresponding rule.
  *
- * If all the rule applications return noProof(), no proof could be found and a noProof() is
- * returned.
+ * If any rule application return noProof() (except for the closure rule), this function
+ * returns noProof() as well. If a rule application returns a cantApply(), the next rule is
+ * tried instead.
  */
 MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
 	//println("seq    = <seq>");
@@ -90,7 +100,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	if (resProof != cantApply()) return resProof;
 	
 	resProof = tryApplyClo(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != cantApply() && resProof != noProof()) return resProof;
+	if (resProof != cantApply()) return resProof;
 	
 	resProof = tryApplyChoice(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != cantApply()) return resProof;
@@ -134,9 +144,7 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
  *
  * The algorithm loops through all the fixpoint sequents, and if for any of them, a cycle is
  * detected, true is returned. Otherwise, false is returned.
- * A cycle is detected for a fixpoint sequent, if this sequent can be reached from the current
- * sequent merely by applying weak and exp rules. This is the case, if each term in the fixpoint
- * sequent can be reduced from a term of the current sequent.
+ * A cycle is detected if the current sequent is identical to any of the sequents in fpSeqs.
  */
 bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
 	for (CloGSequent fpSeq <- fpSeqs)
