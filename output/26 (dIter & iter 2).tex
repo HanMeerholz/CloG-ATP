@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, \textcolor{red}{(p)^{\varepsilon}}$}
+\RightLabel{exp}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{\varepsilon}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{\varepsilon}$}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{\varepsilon}$}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, \textcolor{red}{(p)^{\varepsilon}}$}
+\RightLabel{exp}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(p)^{x_{1}} }$}
+\RightLabel{exp}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(p)^{x_{1}} }$}
+\RightLabel{weak}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{1}} $}
+\RightLabel{weak}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (p)^{x_{1}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (p)^{x_{1}} $}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (p)^{x_{1}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p\vee \langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{1}} $}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (p)^{x_{1}} $}
+\AxiomC{$[(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (\langle {a}^{\times}\rangle p)^{x_{1}} ]^{x_{1}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, \textcolor{red}{(\langle a\rangle \langle {a}^{\times}\rangle p)^{x_{1}} }$}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{x_{1}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p\vee \langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{x_{1}} $}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{x_{1}} $}
+\RightLabel{$\wedge$}
+\BinaryInfC{$(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(p\wedge \langle a\rangle \langle {a}^{\times}\rangle p)^{x_{1}} }$}
+\RightLabel{clo$_{x_{1}}$}
+\UnaryInfC{$(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle {a}^{\times}\rangle p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, \textcolor{red}{(\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, (\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (\langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p\vee \langle {a}^d\rangle \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{$*$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle {{a}^d}^{*}\rangle \langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{$*$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}}, (\langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}$}
+\RightLabel{$\wedge$}
+\BinaryInfC{$(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(p\wedge \langle a\rangle \langle {a}^{\times}\rangle p)^{\varepsilon}}$}
+\RightLabel{$\times$}
+\UnaryInfC{$(\langle {{{a}^d}^{*}}^{*}\rangle \neg p)^{\varepsilon}, \textcolor{red}{(\langle {a}^{\times}\rangle p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle {{{a}^d}^{*}}^{*}\rangle \neg p\vee \langle {a}^{\times}\rangle p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}

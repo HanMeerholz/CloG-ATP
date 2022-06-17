@@ -1,10 +1,13 @@
-module integrationTests::proof_tests
+module integrationTests::Proof_tests
 /*
- * Module to execute the integration test
+ * Module to execute the integration tests
  */
 
 import ATP::CloG_ATP_Tool;
 
+/*
+ * A function that generates LaTeX proofs for each of the sequents in the input folder (manually)
+ */
 void executeTests() {
 	proofSearch_Tool("01 (empty)");
 	proofSearch_Tool("02 (single)");
@@ -31,18 +34,20 @@ void executeTests() {
 	proofSearch_Tool("21 (iter 1)");
 	proofSearch_Tool("22 (iter 2)");
 	proofSearch_Tool("23 (iter 3)");
-	proofSearch_Tool("24 (double iter fail)");
-	proofSearch_Tool("25 (double dIter fail)");
-	proofSearch_Tool("26 (multi iter fail)");
-	proofSearch_Tool("27 (multi dIter fail)");
-	proofSearch_Tool("28 (iter dIter alternate fail)");
-	proofSearch_Tool("29 (multi iter)");
+	proofSearch_Tool("24 (iter 4)");
+	proofSearch_Tool("25 (dIter & iter)");
+	proofSearch_Tool("26 (dIter & iter 2)");
+	proofSearch_Tool("27 (double dIter & iter)");
+	proofSearch_Tool("28 (multi iter)");
+	proofSearch_Tool("29 (multi iter 2)");
 	proofSearch_Tool("30 (multi dIter)");
-	proofSearch_Tool("31 (dIter & iter)");
-	proofSearch_Tool("32 (dIter & iter 2)");
-	proofSearch_Tool("33 (double dIter & iter)");
-	proofSearch_Tool("34 (bigSeq1)");
-	proofSearch_Tool("35 (bigSeq2)");
-	proofSearch_Tool("36 (proof 1)");
-	proofSearch_Tool("37 (proof 2)");
+	proofSearch_Tool("31 (double iter fail)");
+	proofSearch_Tool("32 (double dIter fail)");
+	proofSearch_Tool("33 (multi iter fail)");
+	proofSearch_Tool("34 (multi dIter fail)");
+	proofSearch_Tool("35 (iter dIter alternate fail)");
+	proofSearch_Tool("36 (bigSeq1)");
+	proofSearch_Tool("37 (bigSeq2)");
+	proofSearch_Tool("38 (proof 1)");
+	proofSearch_Tool("39 (proof 2)");
 }
