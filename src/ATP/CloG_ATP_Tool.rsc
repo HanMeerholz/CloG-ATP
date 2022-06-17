@@ -64,7 +64,7 @@ void proofSearch_Tool(str file) {
 
 // Call main proofSearch_Tool function with an empty list of closure sequent and fixpoint sequent files.
 void proofSearch_Tool(str file, int depth) {
-	proofSearch_Tool(file, [], [], -1);
+	proofSearch_Tool(file, [], [], depth);
 }
 
 // Call main proofSearch_Tool function with a depth of -1.

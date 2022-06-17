@@ -604,64 +604,6 @@ MaybeProof tryApplyIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSe
 	return cantApply();	
 }
 
-///* 
-// * A function applying the "dIter" rule to a term
-// * 
-// * Input:  the sequent and the index of the term therein to apply the dIter rule to,
-// *         and the list of closure sequents
-// * Output: the sequent resulting from applying the dIter rule
-// *
-// * For the rule to be applied, the term at the specified index must be of
-// * the form "(<gamma^x>phi)^a".
-// * Each of the names in the label a must be smaller than or equal to this
-// * "(<gamma^x>phi)^a" fixpoint formula, according to the order on fixpoint formulae
-// * defined in the literature.
-// * 
-// * If these conditions is met, the specified term in the given sequent is replaced by
-// * the term "(phi & <gamma><gamma^x>phi)^a" and the sequent is returned. Otherwise,
-// * noSeq() is returned.
-// */
-//MaybeSequent applyDIter(CloGSequent seq, int termIdx, CloSeqs cloSeqs) {
-//	if (term(\mod(dIter(Game gamma), GameLog phi), list[CloGName] a, _) := seq[termIdx]) {
-//		for (CloGName x <- a)
-//			if (!fpLessThanOrEqualTo(cloSeqs[x].contextSeq[cloSeqs[x].fpFormulaIdx].s, \mod(dIter(gamma), phi)))
-//				return noSeq();
-//	
-//		println("applied dIter");
-//		seq[termIdx] = term(and(phi, \mod(gamma, \mod(dIter(gamma), phi))), a, false);
-//		return sequent(seq);
-//	}
-//	return noSeq();
-//}
-//
-///* 
-// * A function applying the "dIter" rule to a sequent and calling the main
-// * proof search algorithm on the resulting sequent.
-// *
-// * For any of the terms in the sequent, the algorithm checks tries to apply the "dIter"
-// * rule. For all successful applications, a proof search is done on the resulting sequent.
-// * If a subproof is found, the current sequent is added to the list of fixpoint sequents,
-// * and a CloGUnaryInf with the resulting subproof, and the applied dIterR() rule is returned.
-// * Otherwise, the subProof itself is returned, which can be noProof() or cantApply().
-// * If the "dIter" rule could not be applied to any term in the sequent, cantApply() is returned.
-// */
-//MaybeProof tryApplyDIter(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
-//	for (int termIdx <- [0 .. size(seq)]) {
-//	
-//		MaybeSequent resSeq = applyDIter(seq, termIdx, cloSeqs);
-//		if (resSeq != noSeq()) {
-//			fpSeqs += [seq];
-//			MaybeProof subProof = proofSearch(resSeq.seq, cloSeqs, fpSeqs, depth - 1);
-//			if (subProof != noProof() && subProof != cantApply()) {
-//				seq[termIdx].active = true;
-//				return proof(CloGUnaryInf(seq, dIterR(), subProof.p));
-//			}
-//			return subProof;
-//		}
-//	}	
-//	return cantApply();
-//}
-
 /* 
  * A function applying the "clo" rule to a term
  * 

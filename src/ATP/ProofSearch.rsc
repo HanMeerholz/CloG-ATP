@@ -126,38 +126,8 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	resProof = tryApplyIter(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != cantApply()) return resProof;
 	
-	//resProof = tryApplyDIter(seq, cloSeqs, fpSeqs, depth);
-	//if (resProof != cantApply() && resProof != noProof()) return resProof;
-	
 	return noProof();
 }
-
-///*
-// * A function that returns whether a sequent matches another, i.e. you can get to the second
-// * sequent from the first sequent by only adding names to the terms in the sequent.
-// *
-// * Input:  two sequents with the same number of terms
-// * Output: true if the second sequent has the same terms as the first one, potentially with
-// *         additional names in its label
-// *
-// * If the sequents are not the same length, false is returned.
-// * This algorithm is recursive. If both sequents are empty, true is returned. Otherwise, 
-// * we try to find two matching terms in the sequents, remove them from both sequents and
-// * call this function on the remaining terms. If no terms in the sequent can be matched,
-// * false is returned.
-// */
-//bool matchSeq(CloGSequent seqFrom, CloGSequent seqTo) {
-//	if (size(seqFrom) != size(seqTo)) return false;
-//
-//	if (size(seqFrom) == 0 && size(seqTo) == 0) return true;
-//	
-//	for (CloGTerm term <- seqTo) {
-//		if (term.s == seqFrom[0].s && toSet(term.label) >= toSet(seqFrom[0].label))
-//			if (matchSeq (seqFrom - seqFrom[0], seqTo - term)) return true;
-//	}
-//	
-//	return false;
-//}
 
 /*
  * A function that returns whether cycles are detected between the current sequent and the list
