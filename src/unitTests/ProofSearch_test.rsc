@@ -292,9 +292,45 @@ test bool detectCycles_test_11() {
 	return detectCycles(input, fpSeqs) == true;
 }
 
+// from: [ [ p^[] p^y ] ]
+// to:   [ p^x p^y ]
+test bool detectCycles_test_12() {
+	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(atomP(prop("p")), [ name("y") ], false)];
+	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false), term(atomP(prop("p")), [name("y")], false)] ];
+
+	return detectCycles(input, fpSeqs) == false;
+}
+
+// from: [ [ p^[] p^x ] ]
+// to:   [ p^x p^y ]
+test bool detectCycles_test_13() {
+	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(atomP(prop("p")), [ name("x") ], false)];
+	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false), term(atomP(prop("p")), [name("x")], false)] ];
+
+	return detectCycles(input, fpSeqs) == false;
+}
+
+// from: [ [ p^x p^y ] ]
+// to:   [ p^[] p^[x y] ]
+test bool detectCycles_test_14() {
+	CloGSequent input = [term(atomP(prop("p")), [ ], false), term(atomP(prop("p")), [ name("x"), name("y") ], false)];
+	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [ name("x") ], false), term(atomP(prop("p")), [ name("y") ], false)] ];
+
+	return detectCycles(input, fpSeqs) == false;
+}
+
+// from: [ [ p^[] p^x q^[] ]
+// to:   [ p^x q^[] q^y ]
+test bool detectCycles_test_15() {
+	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(atomP(prop("q")), [], false), term(atomP(prop("q")), [ name ("y") ], false)];
+	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false), term(atomP(prop("p")), [ name("x") ], false), term(atomP(prop("q")), [], false)] ];
+
+	return detectCycles(input, fpSeqs) == false;
+}
+
 // from: [ [ p^[] ] [ q^[] ] ]
 // to:   [ p^[] ]
-test bool detectCycles_test_12() {
+test bool detectCycles_test_16() {
 	CloGSequent input = [term(atomP(prop("p")), [], false)];
 	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [], false)] ];
 
@@ -303,7 +339,7 @@ test bool detectCycles_test_12() {
 
 // from: [ [ p^[] ] [ q^[] ] [ r^[] ] ]
 // to:   [ q^[] ]
-test bool detectCycles_test_13() {
+test bool detectCycles_test_17() {
 	CloGSequent input = [term(atomP(prop("q")), [], false)];
 	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [], false)], [term(atomP(prop("r")), [], false)] ];
 
@@ -312,7 +348,7 @@ test bool detectCycles_test_13() {
 
 // from: [ [ p^[] ] [ q^[x y] r^[] ] [ s^[] ] ]
 // to:   [ r^[] q^[y x] ]
-test bool detectCycles_test_14() {
+test bool detectCycles_test_18() {
 	CloGSequent input = [term(atomP(prop("r")), [], false), term(atomP(prop("q")), [name("y"), name("x")], false)];
 	list[CloGSequent] fpSeqs = [ [term(atomP(prop("p")), [], false)], [term(atomP(prop("q")), [name("x"), name("y")], false), term(atomP(prop("r")), [], false)], [term(atomP(prop("s")), [], false)] ];
 
@@ -321,8 +357,6 @@ test bool detectCycles_test_14() {
 
 
 // Proof Search with Weakening/Expanding
-
-
 
 // from: [ p^[] ]
 // to :  [ p^[] ]

@@ -14,8 +14,8 @@ import ATP::ATP_Base;
  * Input:  A CloGProof that may contain closure rule applications
  *         without a discharged assumption appearing somewhere above
  *         the proof node at which the closure rule was applied
- * Output: A CloGProof with its closure rule applications replaced
- *         by dIter applications
+ * Output: A CloGProof with its closure rule applications without
+ *         assumptions replaced by dIter applications
  *
  * For each of the nodes at which a closure rule was applied, and
  * above which no discharged assumption appears, the replaceCloAt()

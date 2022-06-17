@@ -16,7 +16,7 @@ import util::IDE;
 import ParseTree;
 import IO;
 
-// Call IDE() in terminal to activate parse checker and keyword hihlighting for .seq files in eclipse.
+// Call IDE() in terminal to activate parse checker and keyword highlighting for .seq files in Eclipse.
 void IDE() {
 	start[SCloGSequent] clogSeq(str src, loc l) {
 		return parse(#start[SCloGSequent], src, l);
@@ -37,7 +37,7 @@ loc outputLoc(str file) {
 	return (|project://CloG-ATP/output| + file)[extension=".tex"];
 }
 
-// Parse input .clog file and output abstract syntax tree for the CloG Proof
+// Parse input .seq file and output abstract syntax tree for the CloG Sequent
 CloGSequent getCloGAST(str file){
 	loc l = inputLoc(file);
 	start[SCloGSequent] cst = parse(#start[SCloGSequent], l);
@@ -56,40 +56,18 @@ void input2latex(str \in,  str out){
 	CloG2LaTeX(CloGUnaryInf(getCloGAST(\in), weak(), CloGLeaf()), out);
 }
 
-// Input .seq file name, do a default proof search on the sequent and display the result in LaTeX
-// (or display "fail!" if no proof could be found).
-void proofSearch_Tool(str file){
-	CloGSequent seqAST = getCloGAST(file);
-	
-	fpClosure = generateFpClosure(seqAST);
-	
-	MaybeProof resProof = proofSearch(seqAST);
-	if (resProof != noProof())
-		LaTeXOutput(resProof.p, outputLoc(file));
-	else
-		println("fail!\n");
-}
-
+// Call main proofSearch_Tool function with an empty list of closure sequent and fixpoint sequent files
+// and a depth of -1.
 void proofSearch_Tool(str file) {
-	proofSearch_Tool(file, -1);
+	proofSearch_Tool(file, [], [], -1);
 }
 
-// Input .seq file name, do a default proof search on the sequent, make it a valid proof by replacing
-// the unused closure rule applications, and display the result in LaTeX
-// (or display "fail!" if no proof could be found).
+// Call main proofSearch_Tool function with an empty list of closure sequent and fixpoint sequent files.
 void proofSearch_Tool(str file, int depth) {
-	CloGSequent seqAST = getCloGAST(file);
-	
-	fpClosure = generateFpClosure(seqAST);
-	
-	MaybeProof resProof = proofSearch(seqAST, depth);
-	if (resProof != noProof()) {
-		CloGProof validProof = replaceUnusedClos(resProof.p);
-		LaTeXOutput(validProof, outputLoc(file));
-	} else
-		println("fail!\n");
+	proofSearch_Tool(file, [], [], -1);
 }
 
+// Call main proofSearch_Tool function with a depth of -1.
 void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpSeqsFiles) {
 	proofSearch_Tool(file, cloSeqFiles, fpSeqsFiles, -1);
 }
@@ -102,8 +80,6 @@ void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpS
 void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpSeqsFiles, int depth){
 	CloGSequent seqAST = getCloGAST(file);
 	
-	fpClosure = generateFpClosure(seqAST);
-	
 	CloSeqs cloSeqs = ();
 	for (int i <- [0 .. size(cloSeqFiles)])
 		cloSeqs += (nameS("x", i): <getCloGAST(cloSeqFiles[i][0]), cloSeqFiles[i][1]>);
@@ -115,7 +91,7 @@ void proofSearch_Tool(str file, list[tuple[str, int]] cloSeqFiles, list[str] fpS
 	MaybeProof resProof = proofSearch(seqAST, cloSeqs, fpSeqs, depth);
 	if (resProof != noProof()) {
 		CloGProof validProof = replaceUnusedClos(resProof.p);
-		LaTeXOutput(resProof.p, outputLoc(file));
+		LaTeXOutput(validProof, outputLoc(file));
 	} else
 		println("fail!\n");
 }

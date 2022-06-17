@@ -20,13 +20,9 @@ alias FpSeq = tuple[CloGSequent contextSeq, int fpFormulaIdx];
  */
 alias CloSeqs = map[CloGName name, FpSeq fpSeq];
 
-alias FpClosure = map[GameLog fpForm, CloGName name];
-
-public FpClosure fpClosure = ();
-
 /*
- * MaybeProof is either a CloGProof, or noProof(), which indicates no proof could be
- * found.
+ * MaybeProof is either a CloGProof, noProof(), which indicates no proof could be
+ * found, or cantApply(), which indicates a rule could not be applied
  */
 data MaybeProof
 	= proof(CloGProof p)

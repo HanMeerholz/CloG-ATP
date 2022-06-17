@@ -1,8 +1,6 @@
 module ATP::ProofSearch
 /*
- * Module defining the basic proof search algorithm, and some helper functions:
- * A basic depth-first search, applying a rule (possibly on a specific formula)
- * at every step.
+ * Module defining the basic proof search algorithm, and some helper functions
  */
 
 import List;
@@ -36,14 +34,15 @@ MaybeProof proofSearch(CloGSequent seq, int maxRecursionDepth) {
 }
 
 /*
- * A depth-first proof search algorithm.
+ * A depth-first proof search algorithm, applying a saturation strategy.
  * 
  * Input:  a sequent to be proven, a map which maps the names present in the sequent to the
  *         associated fixpoint formulae, a list of sequents associated with earlier applications
  *         of iter, dIter, and clo rules, and an integer representing how deep in the proof tree
  *         we are.
- * Output: a MaybeProof, which is either a CloGProof, or a noProof(), which essentially acts as
- *         a null value, indicating no proof could be found.
+ * Output: a MaybeProof, which is either a CloGProof, a noProof() which essentially acts as
+ *         a null value, indicating no proof could be found, or a cantApply() which is mostly
+ *         just used to keep track of where to backtrack to.
  *
  * When the depth reaches 0, we do not recurse any further, and noProof() is returned.
  *
@@ -62,33 +61,31 @@ MaybeProof proofSearch(CloGSequent seq, int maxRecursionDepth) {
  * weakening and expanding rules to reach just 2 terms upon which it can be applied.
  *
  * If no proof can be found by applying those rules, we try applying the remaining rules, in the
- * order clo, choice, dChoice, concat, test, dTest, and, or, iter, dIter, and modm.
+ * order choice, dChoice, concat, test, dTest, and, or, iter, dIter, clo and modm.
  *
- * We start with the clo rule application, because we want to apply this rule as early as
- * possible in order to find a desired cycle more easily. After the clo rule, we saturate the
- * sequent as much as possible, until no more rules can be applied or a cycle is detected.
+ * We saturate the sequent as much as possible, until no more rules can be applied or a cycle is
+ * detected. We apply the closure rule last, because we can always move a closure rule application
+ * up in a CloG proof with respect to most local rules. Only after saturating the sequent, modm is
+ * applied.
  *
- * Only then, the last rule, modm is applied, which is not invertible like the other rules. 
+ * Different rule orders are possible, however. Shorter or more efficient proofs can sometimes be
+ * found by applying the modm rule first, applying the clo rule as early as possible, or trying
+ * other rule orders, that might work well on specific sequents.
  *
- * Each rule application returns a MaybePoof, since they recursively call the proofSearch()
+ * Each rule application returns a MaybeProof, since they recursively call the proofSearch()
  * algorithm again (except for the tryDisClo() and tryApplyAx1() rules, which call the
  * proofSearchWeakExp() algorithm instead) on the resulting sequent of the application of the
  * corresponding rule.
  *
  * If any rule application return noProof() (except for the closure rule), this function
  * returns noProof() as well. If a rule application returns a cantApply(), the next rule is
- * tried instead.
+ * tried instead. The tryApplyModm() function forms an exception. We try to apply the next rule
+ * even if this function returns noProof(), because the modm rule is not exchangeable like the other
+ * local rules.
  */
 MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeqs, int depth) {
-	//println("seq    = <seq>");
-	//println("cloSeqs = <cloSeqs>");
-	//println("fpAppls = <fpAppls>");
+	if (depth == 0) return proof(CloGLeaf());
 	
-	if (depth == 0) return noProof(); //proof(CloGLeaf());
-	
-	//if (isEmpty(seq)) return proof(CloGLeaf());
-	
-	//remove the duplicates
 	seq = dup(seq);
 	
 	resProof = tryDisClo(seq, cloSeqs);
@@ -98,6 +95,9 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	
 	resProof = tryApplyAx1(seq);
 	if (resProof != cantApply()) return resProof;
+	
+	resProof = tryApplyModm(seq, cloSeqs, fpSeqs, depth);
+	if (resProof != cantApply() && resProof != noProof()) return resProof;
 	
 	resProof = tryApplyClo(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != cantApply()) return resProof;
@@ -123,17 +123,41 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
 	resProof = tryApplyAnd(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != cantApply()) return resProof;
 	
-	resProof = tryApplyDIter(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != cantApply()) return resProof;
-	
 	resProof = tryApplyIter(seq, cloSeqs, fpSeqs, depth);
 	if (resProof != cantApply()) return resProof;
 	
-	resProof = tryApplyModm(seq, cloSeqs, fpSeqs, depth);
-	if (resProof != cantApply()) return resProof;	
+	//resProof = tryApplyDIter(seq, cloSeqs, fpSeqs, depth);
+	//if (resProof != cantApply() && resProof != noProof()) return resProof;
 	
 	return noProof();
 }
+
+///*
+// * A function that returns whether a sequent matches another, i.e. you can get to the second
+// * sequent from the first sequent by only adding names to the terms in the sequent.
+// *
+// * Input:  two sequents with the same number of terms
+// * Output: true if the second sequent has the same terms as the first one, potentially with
+// *         additional names in its label
+// *
+// * If the sequents are not the same length, false is returned.
+// * This algorithm is recursive. If both sequents are empty, true is returned. Otherwise, 
+// * we try to find two matching terms in the sequents, remove them from both sequents and
+// * call this function on the remaining terms. If no terms in the sequent can be matched,
+// * false is returned.
+// */
+//bool matchSeq(CloGSequent seqFrom, CloGSequent seqTo) {
+//	if (size(seqFrom) != size(seqTo)) return false;
+//
+//	if (size(seqFrom) == 0 && size(seqTo) == 0) return true;
+//	
+//	for (CloGTerm term <- seqTo) {
+//		if (term.s == seqFrom[0].s && toSet(term.label) >= toSet(seqFrom[0].label))
+//			if (matchSeq (seqFrom - seqFrom[0], seqTo - term)) return true;
+//	}
+//	
+//	return false;
+//}
 
 /*
  * A function that returns whether cycles are detected between the current sequent and the list
@@ -144,15 +168,14 @@ MaybeProof proofSearch(CloGSequent seq, CloSeqs cloSeqs, list[CloGSequent] fpSeq
  *
  * The algorithm loops through all the fixpoint sequents, and if for any of them, a cycle is
  * detected, true is returned. Otherwise, false is returned.
- * A cycle is detected if the current sequent is identical to any of the sequents in fpSeqs.
+ * A cycle is detected if the current sequent exactly matches any of the sequent saved in the
+ * list of saved fixpoint sequents.
  */
 bool detectCycles(CloGSequent seq, list[CloGSequent] fpSeqs) {
-	
-
 	for (CloGSequent fpSeq <- fpSeqs)
-		if (toSet([<seqTerm.s, toSet(seqTerm.label)> | seqTerm <- seq]) == toSet([<fpSeqTerm.s, toSet(fpSeqTerm.label)> | fpSeqTerm <- fpSeq]))
+		if (toSet([<fpSeqTerm.s, toSet(fpSeqTerm.label)> | fpSeqTerm <- fpSeq]) == toSet([<seqTerm.s, toSet(seqTerm.label)> | seqTerm <- seq])) 
 			return true;
-			
+		
 	return false;
 }
 
@@ -197,14 +220,14 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs) {
 
 /*
  * A function that searches for a proof from one sequent to another, using only the exp and weak
- * rules of CloG. The proof ends in the provided tail of the proof.
+ * rules of CloG.
  *
  * Input:  the sequent to start from, the sequent to end up on, and the current depth
  * Output: the proof of the first sequent, which applies exp and weak rules to reach the second
- *         sequent, and ends in a (dummy) weakening rule to a CloGLeaf() or noProof() if the
+ *         sequent, and ends in a (dummy) weakening rule to a CloGLeaf(), or noProof() if the
  *         sequent couldn't be reached
  *
- * For each of terms in the first sequent, if it corresponds to a term in the second term,
+ * For each of terms in the first sequent, if it corresponds to a term in the second sequent,
  * we apply the exp rule until it has the same label. If this term does not correspond to a
  * term in the second sequent, we apply weakening to the starting term, and move to the next
  * term. We either end up with the second sequent, in which case a proof is found, or we end up
@@ -212,9 +235,6 @@ MaybeProof tryDisClo(CloGSequent seq, CloSeqs cloSeqs) {
  * is returned.
  */
 MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo) {
-	//if (depth == 0) return noProof();
-	
-
 	if (isEmpty(seqFrom))
 		return noProof();
 		
