@@ -1,15 +1,18 @@
 module CloG_Base::CST2AST_CloG
 /*
- * Module containing function to transform CloG input to an abstract syntax tree
+ * A module containing functions to transform the CloG input to an abstract syntax tree
  */
 
-import ParseTree;
 import String;
 
 import CloG_Base::CloGSyntax;
 import CloG_Base::GLASTs;
-import List;
 
+/* Main function for syntax conversion
+ *
+ * Input:  Parsed CloG input sequent syntax
+ * Output: CloGSequent algebraic type for whole proof
+ */
 CloGSequent cst2astCloG(start[SCloGSequent] ss){
 	SCloGSequent s = ss.top;
 	

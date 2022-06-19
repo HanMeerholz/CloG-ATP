@@ -1,10 +1,10 @@
 module CloG_Base::GLASTs
 /*
- * Module defining all Abstract Syntax Types for the Game logic proof transformations
+ * A module defining Abstract Syntax Types for CloG sequents and proofs
  */
  
 /*
- * Abstract Syntax for a CloG Proof
+ * Abstract Syntax for a CloG Proof and CloG Sequent
  */
 
 data CloGProof(loc src = |tmp:///|)

@@ -8,7 +8,6 @@ import Map;
 import CloG_Base::GLASTs;
 import ATP::ATP_Base;
 import ATP::RuleApplications;
-import IO;
 
 /*
  * Calls the main proof search algorithm without a maximum recursion depth, and with an
@@ -220,8 +219,7 @@ MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo) {
 			termTo = seqTo[j];
 			if (termFrom.s == termTo.s && toSet(termFrom.label) > toSet(termTo.label)) {
 				for (CloGName n <- termFrom.label - termTo.label) {
-					
-					println("applied exp");				
+						
 					newSeq = seqFrom;
 					newSeq[i] = term(termFrom.s, termFrom.label - n, false);
 					
@@ -233,7 +231,6 @@ MaybeProof proofSearchWeakExp(CloGSequent seqFrom, CloGSequent seqTo) {
 				}
 			}
 		}
-		println("applied weak");
 		
 		newSeq = delete(seqFrom, i);
 		subProof = proofSearchWeakExp(newSeq, seqTo);

@@ -1,12 +1,11 @@
 module CloG_Base::CloGSyntax
 /* 
- * Module defines the concrete syntax for the input of a CloG proof
+ * A module defining the concrete syntax for the input of a CloG sequent
  *
  * Converted to abstract syntax tree by CST2AST_CloG module
  */ 
 
 extend lang::std::Layout;
-//extend lang::std::Id;
 	
 /*
  * A seq file starts with "Seq" and consists of a list of labeled formulae, represented as CloG terms wrapped by [].

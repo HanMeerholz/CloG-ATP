@@ -1,6 +1,6 @@
 module ATP::ATP_Base
 /*
- * Module defining data types relevant for the Automated Theorem Prover, and
+ * A module defining data types relevant for the Automated Theorem Prover, and
  * some helper functions.
  */
 

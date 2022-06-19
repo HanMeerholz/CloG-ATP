@@ -3,7 +3,7 @@ module unitTests::RuleApplications_test
 import CloG_Base::GLASTs;
 import ATP::RuleApplications;
 import ATP::ATP_Base;
-import IO;
+
 
 // Apply Ax1
 
@@ -59,7 +59,6 @@ test bool tryApplyAx1_test_1() {
 	
 	return tryApplyAx1(input) == output;
 }
-
 // q^[] p^[] ~p^[]
 test bool tryApplyAx1_test_2() {
 	CloGSequent input = [term(atomP(prop("q")), [], false), term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [], false)];
@@ -71,7 +70,6 @@ test bool tryApplyAx1_test_2() {
 	
 	return tryApplyAx1(input) == output;
 }
-
 // p^[] q^[] ~p^[]
 test bool tryApplyAx1_test_3() {
 	CloGSequent input = [term(atomP(prop("p")), [], false), term(atomP(prop("q")), [], false), term(neg(atomP(prop("p"))), [], false)];
@@ -83,7 +81,6 @@ test bool tryApplyAx1_test_3() {
 	
 	return tryApplyAx1(input) == output;
 }
-
 // p^x ~p^[]
 test bool tryApplyAx1_test_4() {
 	CloGSequent input = [term(atomP(prop("p")), [name("x")], false), term(neg(atomP(prop("p"))), [], false)];
@@ -95,7 +92,6 @@ test bool tryApplyAx1_test_4() {
 	
 	return tryApplyAx1(input) == output;
 }
-
 // p^[] ~p^x
 test bool tryApplyAx1_test_5() {
 	CloGSequent input = [term(atomP(prop("p")), [], false), term(neg(atomP(prop("p"))), [name("x")], false)];
@@ -107,7 +103,6 @@ test bool tryApplyAx1_test_5() {
 	
 	return tryApplyAx1(input) == output;
 }
-
 // q^x ~p^[x y] r^[] p^y s^[y z]
 test bool tryApplyAx1_test_6() {
 	CloGSequent input = [term(atomP(prop("q")), [name("x")], false), term(neg(atomP(prop("p"))), [name("x"), name("y")], false), term(atomP(prop("r")), [], false), term(atomP(prop("p")), [name("y")], false), term(atomP(prop("s")), [name("y"), name("z")], false)];
@@ -140,6 +135,7 @@ test bool tryApplyAx1_test_6() {
 	
 	return tryApplyAx1(input) == output;
 }
+
 
 // Apply Modm
 
@@ -597,6 +593,7 @@ test bool applyDChoice_test_15() {
 	return applyDChoice(input, 0) == output;
 }
 
+
 // Apply concat
 
 // p^[]
@@ -704,6 +701,7 @@ test bool applyConcat_test_15() {
 	
 	return applyConcat(input, 0) == output;
 }
+
 
 
 // Apply test
@@ -923,6 +921,7 @@ test bool applyDTest_test_15() {
 	return applyDTest(input, 0) == output;
 }
 
+
 // Apply iter
 
 // p^[] (empty closure map)
@@ -1099,186 +1098,6 @@ test bool applyIter_test_22() {
 	
 	return applyIter(input, 0, ()) == output;
 }
-
-
-// Apply dIter
-
-// p^[] (empty closure map)
-test bool applyDIter_test_1() {
-	CloGSequent input = [term(atomP(prop("p")), [], false)];
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <a>p^[] (empty closure map)
-test bool applyDIter_test_2() {
-	CloGSequent input = [term(\mod(atomG(agame("a")), atomP(prop("p"))), [], false)];
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <a^x>p^[] (empty closure map)
-test bool applyDIter_test_3() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)];
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false)]);
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <a^x>p^[] (closure map contains fp formula for x: <a^x>p)
-test bool applyDIter_test_4() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)];
-	CloSeqs cloSeqs = (name("x"): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>);
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>~p^[] (empty closure map)
-test bool applyDIter_test_5() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), neg(atomP(prop("p")))), [], false)];
-	MaybeSequent output = sequent([term(and(neg(atomP(prop("p"))), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), neg(atomP(prop("p")))))), [], false)]);
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <(a^d)^x>p^[] (empty closure map)
-test bool applyDIter_test_6() {
-	CloGSequent input = [term(\mod(dIter(dual(atomG(agame("a")))), atomP(prop("p"))), [], false)];
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(dual(atomG(agame("a"))), \mod(dIter(dual(atomG(agame("a")))), atomP(prop("p"))))), [], false)]);
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <a^x>p^x (closure map contains fp formula for x: <a^x>p = <a^x>p)
-test bool applyDIter_test_7() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x")], false)];
-	CloSeqs cloSeqs = (name("x"): <[term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false)], 0>);
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [name("x")], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^x (closure map contains fp formula for x: <a^x^x>p < <a^x>p)
-test bool applyDIter_test_8() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x")], false)];
-	CloSeqs cloSeqs = (name("x"): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>);
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [name("x")], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^x (closure map contains fp formula for x: <b^x>p !<= <a^x>p)
-test bool applyDIter_test_9() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x")], false)];
-	CloSeqs cloSeqs = (name("x"): <[term(\mod(dIter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>);
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^y (closure map contains fp formula for x: <b^x>p !<= <a^x>p and y: <a^x^x>p < <a^x>p)
-test bool applyDIter_test_10() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("y")], false)];
-	CloSeqs cloSeqs = (
-		name("x"): <[term(\mod(dIter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>,
-		name("y"): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>
-	);
-	
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [name("y")], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^x (closure map contains fp formula for x: <a^x^x>p < <a^x>p and y: <b^x>p !<= <a^x>p)
-test bool applyDIter_test_11() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x")], false)];
-	CloSeqs cloSeqs = (
-		name("x"): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>,
-		name("y"): <[term(\mod(dIter(atomG(agame("b"))), atomP(prop("p"))), [], false)], 0>
-	);
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [name("x")], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^{x, y} (closure map contains fp formula for x: <a^x^x>p < <a^x>p and y: <(a^x;b)^x>q < <a^x>p)
-test bool applyDIter_test_12() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x"), name("y")], false)];
-	CloSeqs cloSeqs = (
-		name("x"): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>,
-		name("y"): <[term(\mod(dIter(concat(dIter(atomG(agame("a"))), atomG(agame("b")))), atomP(prop("q"))), [name("x")], false)], 0>
-	);
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [name("x"), name("y")], false)]);
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// <a^x>p^{x, y} (closure map contains fp formula for x: <a^x^x>p < <a^x>p and y: <b^x>p !<= <a^x>p)
-test bool applyDIter_test_13() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [name("x"), name("y")], false)];
-	CloSeqs cloSeqs = (
-		name("x"): <[term(\mod(dIter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)], 0>,
-		name("y"): <[term(\mod(dIter(atomG(agame("b"))), atomP(prop("p"))), [name("x")], false)], 0>
-	);
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, cloSeqs) == output;
-}
-// [<a^x>p^[] q^[]] (apply to first term; empty closure map)
-test bool applyDIter_test_14() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false), term(atomP(prop("q")), [], false)]);
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// [<a^x>p^[] q^[]] (apply to second term; empty closure map)
-test bool applyDIter_test_15() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(atomP(prop("q")), [], false)];
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 1, ()) == output;
-}
-// [p^[] <a^x>q^[]] (apply to second term; empty closure map)
-test bool applyDIter_test_16() {
-	CloGSequent input = [term(atomP(prop("p")), [], false), term(\mod(dIter(atomG(agame("a"))), atomP(prop("q"))), [], false)];
-	MaybeSequent output = sequent([term(atomP(prop("p")), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("q"))))), [], false)]);
-	
-	return applyDIter(input, 1, ()) == output;
-}
-// [p^[] <a^x>q^[] r^[]] (apply to second term; empty closure map)
-test bool applyDIter_test_17() {
-	CloGSequent input = [term(atomP(prop("p")), [], false), term(\mod(dIter(atomG(agame("a"))), atomP(prop("q"))), [], false), term(atomP(prop("r")), [], false)];
-	MaybeSequent output = sequent([term(atomP(prop("p")), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("q"))))), [], false), term(atomP(prop("r")), [], false)]);
-	
-	return applyDIter(input, 1, ()) == output;
-}
-// [<a^x>p^[] <b^x>q^[]] (apply to first term; empty closure map)
-test bool applyDIter_test_18() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)]);
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// [<a^x>p^[] <b^x>q^[]] (apply to second term; empty closure map)
-test bool applyDIter_test_19() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
-	MaybeSequent output = sequent([term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("b")), \mod(dIter(atomG(agame("b"))), atomP(prop("q"))))), [], false)]);
-	
-	return applyDIter(input, 1, ()) == output;
-}
-// [<a^x>p^[] <b^x>q^[]] (apply to both terms; empty closure map)
-test bool applyDIter_test_20() {
-	CloGSequent input = [term(\mod(dIter(atomG(agame("a"))), atomP(prop("p"))), [], false), term(\mod(dIter(atomG(agame("b"))), atomP(prop("q"))), [], false)];
-	MaybeSequent output = sequent([term(and(atomP(prop("p")), \mod(atomG(agame("a")), \mod(dIter(atomG(agame("a"))), atomP(prop("p"))))), [], false), term(and(atomP(prop("q")), \mod(atomG(agame("b")), \mod(dIter(atomG(agame("b"))), atomP(prop("q"))))), [], false)]);
-	
-	return applyDIter(applyDIter(input, 0, ()).seq, 1, ()) == output;
-}
-// <a||b>p^[] (empty closure map)
-test bool applyDIter_test_21() {
-	CloGSequent input = [term(\mod(choice(atomG(agame("a")), atomG(agame("b"))), atomP(prop("p"))), [], false)];
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, ()) == output;
-}
-// <(a^x)*>p^[] (empty closure map)
-test bool applyDIter_test_22() {
-	CloGSequent input = [term(\mod(iter(dIter(atomG(agame("a")))), atomP(prop("p"))), [], false)];
-	MaybeSequent output = noSeq();
-	
-	return applyDIter(input, 0, ()) == output;
-}
-
 
 
 // Apply clo

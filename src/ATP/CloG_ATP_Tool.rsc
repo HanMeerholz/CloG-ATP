@@ -10,7 +10,6 @@ import CloG_Base::LaTeXOutput;
 import ATP::ATP_Base;
 import ATP::ProofSearch;
 import ATP::PostProcess;
-import ATP::Closure;
 
 import util::IDE;
 import ParseTree;

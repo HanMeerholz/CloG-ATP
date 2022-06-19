@@ -8,7 +8,7 @@ import ATP::ATP_Base;
 import CloG_Base::GLASTs;
 import Exception;
 
-// SubTerm
+// Subterm
 
 // A game should be a subterm of itself
 // (a <= a)
@@ -60,7 +60,7 @@ test bool subTerm_test_12() =
 	subTerm(dChoice(atomG(agame("a")), atomG(agame("b"))), dChoice(iter(atomG(agame("a"))), atomG(agame("b")))) == false;
 
 
-// fpLessThanOrEqualTo
+// Less Than Or Equal To (Fixpoint Formula Ordering)
 
 // <a*>p <= <a*>q
 test bool fpLessThanOrEqualTo_test_1() = 

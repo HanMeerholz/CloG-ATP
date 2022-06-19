@@ -3,7 +3,6 @@ module unitTests::ProofSearch_test
 import CloG_Base::GLASTs;
 import ATP::ATP_Base;
 import ATP::ProofSearch;
-import IO;
 
 
 // Try Closure Discharge
