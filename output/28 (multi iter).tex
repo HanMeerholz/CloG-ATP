@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(\neg p)^{\varepsilon}}, \textcolor{red}{(p)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(\neg p)^{\varepsilon}, (p)^{\varepsilon}, \textcolor{red}{(\langle {{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}\rangle \langle {{{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}}^{*}\rangle p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(p\vee \langle {{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}\rangle \langle {{{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}}^{*}\rangle p)^{\varepsilon}}$}
+\RightLabel{$*$}
+\UnaryInfC{$(\neg p)^{\varepsilon}, \textcolor{red}{(\langle {{{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}}^{*}\rangle p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\neg p\vee \langle {{{{{{a}^{*}}^{*}}^{*}}^{*}}^{*}}^{*}\rangle p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}

@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(p\vee \neg p)^{\varepsilon}}$}
+\RightLabel{$!$}
+\UnaryInfC{$\textcolor{red}{(\langle p!\rangle \neg p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}

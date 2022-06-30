@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(q)^{\varepsilon}}, \textcolor{red}{(\neg q)^{\varepsilon}}$}
+\RightLabel{weak}
+\UnaryInfC{$(q)^{\varepsilon}, (\neg q)^{\varepsilon}, \textcolor{red}{(r)^{x_{2}} }$}
+\RightLabel{exp}
+\UnaryInfC{$(q)^{\varepsilon}, \textcolor{red}{(\neg q)^{x_{1}} }, (r)^{x_{2}} $}
+\RightLabel{exp}
+\UnaryInfC{$(q)^{\varepsilon}, \textcolor{red}{(\neg q)^{x_{0}, x_{1}} }, (r)^{x_{2}} $}
+\RightLabel{exp}
+\UnaryInfC{$\textcolor{red}{(q)^{x_{1}} }, (\neg q)^{x_{0}, x_{1}} , (r)^{x_{2}} $}
+\RightLabel{exp}
+\UnaryInfC{$\textcolor{red}{(q)^{x_{0}, x_{1}} }, (\neg q)^{x_{0}, x_{1}} , (r)^{x_{2}} $}
+\RightLabel{weak}
+\UnaryInfC{$\textcolor{red}{(p)^{x_{0}} }, (q)^{x_{0}, x_{1}} , (\neg q)^{x_{0}, x_{1}} , (r)^{x_{2}} $}
+\RightLabel{$\vee$}
+\UnaryInfC{$(p)^{x_{0}} , \textcolor{red}{(q\vee \neg q)^{x_{0}, x_{1}} }, (r)^{x_{2}} $}
+\end{prooftree}
+
+\end{document}

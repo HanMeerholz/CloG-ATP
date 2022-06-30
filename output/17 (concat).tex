@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{prooftrees}
+
+\begin{document}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{Ax1}
+\UnaryInfC{$\textcolor{red}{(p)^{\varepsilon}}, \textcolor{red}{(\neg p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle b\rangle p)^{\varepsilon}}, \textcolor{red}{(\langle {b}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{mod$_{m}$}
+\UnaryInfC{$\textcolor{red}{(\langle a\rangle \langle b\rangle p)^{\varepsilon}}, \textcolor{red}{(\langle {a}^d\rangle \langle {b}^d\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{$;$}
+\UnaryInfC{$(\langle a\rangle \langle b\rangle p)^{\varepsilon}, \textcolor{red}{(\langle ({a}^d;{b}^d)\rangle \neg p)^{\varepsilon}}$}
+\RightLabel{$;$}
+\UnaryInfC{$\textcolor{red}{(\langle (a;b)\rangle p)^{\varepsilon}}, (\langle ({a}^d;{b}^d)\rangle \neg p)^{\varepsilon}$}
+\RightLabel{$\vee$}
+\UnaryInfC{$\textcolor{red}{(\langle (a;b)\rangle p\vee \langle ({a}^d;{b}^d)\rangle \neg p)^{\varepsilon}}$}
+\end{prooftree}
+
+\end{document}
